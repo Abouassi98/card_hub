@@ -1,0 +1,34 @@
+import '../../card_hub.dart';
+
+/// Represents a credit card model.
+class CardHubModel {
+  /// Constructs a [CardHubModel].
+  CardHubModel({
+    required this.lastFour,
+    required this.expirationMonth,
+    required this.expirationYear,
+    required this.cardHolderName,
+    required this.type,
+    required this.bankName,
+  });
+
+  /// A string indicating number on the card.
+  final int lastFour;
+
+  /// The expiration month of the credit card.
+  final int expirationMonth;
+
+  /// The expiration year of the credit card.
+  final int expirationYear;
+
+  /// A string indicating name of the card holder.
+  final String cardHolderName;
+
+  /// Sets type of the card. An small image is shown based on selected type
+  /// of the card at bottom right corner. If this is set to null then image
+  /// shown automatically based on credit card number.
+  final CardType type;
+
+  /// A string indicating name of the bank.
+  final String? bankName;
+}

@@ -1,0 +1,45 @@
+name: card_hub
+description: A starting point for Dart libraries or applications.
+version: 0.1.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ">=3.8.1 <4.0.0"
+
+# Add regular dependencies here.
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # DI  
+  flutter_hooks: ^0.21.2
+
+  # Images
+  flutter_svg: ^2.2.0
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  # Lints 
+  flutter_lints: ^6.0.0
+
+
+
+
+import_sorter:
+  comments: false
+
+
+flutter:
+  uses-material-design: true
+
+
+
+  assets:
+    - assets/images/cards/
+
+  fonts: 
+    - family: halter
+      fonts:
+        - asset: assets/fonts/halter.ttf

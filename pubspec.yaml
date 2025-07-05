@@ -1,0 +1,17 @@
+name: card_hub_demo
+description: "A new Flutter project."
+
+
+environment:
+  sdk: ">=3.8.1 <4.0.0"
+  flutter: ">=3.22.0"
+
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  melos: ^6.3.3
+
+  # Lints
+  very_good_analysis: ^6.0.0
+
+

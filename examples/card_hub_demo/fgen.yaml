@@ -1,0 +1,14 @@
+# Current generated assets command:
+# fgen
+# For help: fgen -h
+exclude:
+
+include:
+
+watch: false
+
+preview: false
+
+output: lib/src/utils/asset_paths.dart 
+
+name: AssetPaths
