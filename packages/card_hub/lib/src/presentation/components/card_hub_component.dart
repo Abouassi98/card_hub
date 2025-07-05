@@ -21,8 +21,13 @@ class CardHubComponent extends StatelessWidget {
   /// The type of credit card (Visa or Mastercard).
   final CardType visaMasterCardType;
 
+  /// The style data for the credit card.
   final CardHubStyleData? cardHubStyleData;
+
+  /// The callback function to be called when the remove card button is pressed.
   final void Function()? onRemoveCard;
+
+  /// Whether the credit card is selected.
   final bool isSelected;
 
   @override
@@ -31,44 +36,31 @@ class CardHubComponent extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            gradient:
-                cardHubStyleData?.gradient ?? visaMasterCardType.gradient,
+            gradient: cardHubStyleData?.gradient ?? visaMasterCardType.gradient,
             borderRadius: const BorderRadius.all(Radius.circular(15)),
           ),
-          width: cardHubStyleData?.width ??
-              MediaQuery.sizeOf(context).width * 0.9,
-          margin: cardHubStyleData?.margin ??
+          width: cardHubStyleData?.width ?? MediaQuery.sizeOf(context).width * 0.9,
+          margin:
+              cardHubStyleData?.margin ??
               const EdgeInsets.symmetric(
                 horizontal: Sizes.paddingH20,
               ).copyWith(top: Sizes.paddingV10),
-          padding: cardHubStyleData?.padding ??
-              const EdgeInsets.only(left: 16, right: 16, bottom: 22),
+          padding:
+              cardHubStyleData?.padding ?? const EdgeInsets.only(left: 16, right: 16, bottom: 22),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              CardHubLogo(
-                  image: cardHubStyleData?.logoImage ??
-                      visaMasterCardType.image),
-              const SizedBox(
-                height: Sizes.marginV16,
-              ),
-              Text(
-                card.bankName ?? '',
-                style: TextStyles.defaultCreditCardStyle(context),
-              ),
-              const SizedBox(
-                height: Sizes.marginV16,
-              ),
+              CardHubLogo(image: cardHubStyleData?.logoImage ?? visaMasterCardType.image),
+              const SizedBox(height: Sizes.marginV16),
+              Text(card.bankName ?? '', style: TextStyles.defaultCreditCardStyle(context)),
+              const SizedBox(height: Sizes.marginV16),
               Text(
                 '${AppConstants.twelveX} ${card.lastFour}',
                 textAlign: TextAlign.left,
-                style: cardHubStyleData?.textStyle ??
-                    TextStyles.defaultCreditCardStyle(context),
+                style: cardHubStyleData?.textStyle ?? TextStyles.defaultCreditCardStyle(context),
               ),
-              const SizedBox(
-                height: Sizes.marginV10,
-              ),
+              const SizedBox(height: Sizes.marginV10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -95,10 +87,7 @@ class CardHubComponent extends StatelessWidget {
               child: const CircleAvatar(
                 backgroundColor: Colors.red,
                 radius: Sizes.cardR16,
-                child: Icon(
-                  Icons.remove,
-                  color: Colors.white,
-                ),
+                child: Icon(Icons.remove, color: Colors.white),
               ),
             ),
           ),

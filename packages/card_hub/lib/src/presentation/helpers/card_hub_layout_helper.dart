@@ -3,10 +3,7 @@ import '../../utils/card_configs.dart';
 /// A utility class providing helper methods for card layout calculations.
 abstract class CardHubLayoutHelper {
   /// Calculates the index of an unselected card based on the selected card index.
-  static int unselectedCardIndex({
-    required int index,
-    int? selectedCardIndex,
-  }) {
+  static int unselectedCardIndex({required int index, int? selectedCardIndex}) {
     if (selectedCardIndex != null) {
       if (index < selectedCardIndex) {
         return index;
@@ -29,10 +26,7 @@ abstract class CardHubLayoutHelper {
         return CardConfigs.kSpaceBetweenCard;
       } else {
         return CardConfigs.kSpaceUnselectedCardToTop +
-            unselectedCardIndex(
-                  selectedCardIndex: selectedCardIndex,
-                  index: index,
-                ) *
+            unselectedCardIndex(selectedCardIndex: selectedCardIndex, index: index) *
                 CardConfigs.kSpaceBetweenUnselectCard;
       }
     } else {
@@ -56,10 +50,7 @@ abstract class CardHubLayoutHelper {
         final totalUnselectCard = length - 1;
         return 1.0 -
             (totalUnselectCard -
-                    unselectedCardIndex(
-                      selectedCardIndex: selectedCardIndex,
-                      index: index,
-                    ) -
+                    unselectedCardIndex(selectedCardIndex: selectedCardIndex, index: index) -
                     1) *
                 0.05;
       }
@@ -69,13 +60,9 @@ abstract class CardHubLayoutHelper {
   }
 
   /// Calculates the total height occupied by all cards.
-  static double totalCardsHeight({
-    required int totalCard,
-    int? selectedCardIndex,
-  }) {
+  static double totalCardsHeight({required int totalCard, int? selectedCardIndex}) {
     if (selectedCardIndex == null) {
-      return CardConfigs.kSpaceBetweenCard * (totalCard + 1) +
-          CardConfigs.kCardHeight * totalCard;
+      return CardConfigs.kSpaceBetweenCard * (totalCard + 1) + CardConfigs.kCardHeight * totalCard;
     } else {
       return CardConfigs.kSpaceUnselectedCardToTop +
           CardConfigs.kCardHeight +

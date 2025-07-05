@@ -13,9 +13,6 @@ abstract class AppStaticColors {
   static const LinearGradient visaCardIngredientColor = LinearGradient(
     begin: Alignment(0.57, -0.82),
     end: Alignment(-0.57, 0.82),
-    colors: [
-      Color(0xff3c3c3c),
-      Color(0xff1e1e1e),
-    ],
+    colors: [Color(0xff3c3c3c), Color(0xff1e1e1e)],
   );
 }

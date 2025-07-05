@@ -17,8 +17,17 @@ class CardHubMotionKitWidget extends HookWidget {
 
   /// The list of credit card models.
   final List<CardHubModel> items;
+
+  /// The style configuration for the credit card widgets.
+  /// Provides custom width, padding, margin, animation, and more.
   final CardHubStyleData? cardHubStyleData;
+
+  /// Callback triggered when a card is removed from the UI.
   final void Function()? onRemoveCard;
+
+  /// Builds the widget tree for the CardHub motion kit UI.
+  ///
+  /// Returns a [Scaffold] containing a stack of animated credit card widgets and selection logic.
   @override
   Widget build(BuildContext context) {
     final selectedCardIndexNotifier = useValueNotifier<int?>(null);
@@ -34,9 +43,11 @@ class CardHubMotionKitWidget extends HookWidget {
           ? Center(
               child: Padding(
                 padding: const EdgeInsets.all(8),
-                child: Text('No Cards',
-                    textAlign: TextAlign.center,
-                    style: TextStyles.f18SemiBold(context)),
+                child: Text(
+                  'No Cards',
+                  textAlign: TextAlign.center,
+                  style: TextStyles.f18SemiBold(context),
+                ),
               ),
             )
           : SingleChildScrollView(

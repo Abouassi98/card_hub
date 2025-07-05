@@ -7,10 +7,7 @@ import '../../utils/styles/styles.dart';
 /// A widget representing the logo of a credit card.
 class CardHubLogo extends StatelessWidget {
   /// Constructs a [CardHubLogo].
-  const CardHubLogo({
-    super.key,
-    required this.image,
-  });
+  const CardHubLogo({super.key, required this.image});
 
   /// The image asset path for the card logo.
   final String image;
@@ -27,14 +24,8 @@ class CardHubLogo extends StatelessWidget {
           width: 18,
         ),
         Padding(
-          padding: const EdgeInsets.only(
-              top: Sizes.paddingV8, right: Sizes.paddingH8),
-          child: SvgPicture.asset(
-            image,
-            package: AppConstants.packageName,
-            height: 50,
-            width: 50,
-          ),
+          padding: const EdgeInsets.only(top: Sizes.paddingV8, right: Sizes.paddingH8),
+          child: SvgPicture.asset(image, package: AppConstants.packageName, height: 50, width: 50),
         ),
       ],
     );
