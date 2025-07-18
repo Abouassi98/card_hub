@@ -5,6 +5,13 @@ packages:
   - packages/**
   - examples/**
 
+categories:
+  apps:
+    - examples/*
+  packages:
+    - packages/*
+
+    
 command:
   version:
     message: |
@@ -15,8 +22,68 @@ command:
     environment:
       sdk: ">=3.8.1 <4.0.0"
       flutter: ">=3.32.5"
+    dependencies:
+      # DI  
+      flutter_hooks: ^0.21.2
+
+      # Images
+      flutter_svg: ^2.2.0
+
+      # StateManagement & DI
+      dart_mappable: ^4.5.0
+
+    dev_dependencies:
+      # Lints 
+      flutter_lints: ^6.0.0
+
+      # Code gen
+      build_runner: ^2.5.4
+      dart_mappable_builder: ^4.5.0
+
+    hooks:
+      post: |
+        melos gen-l10n
+        dart pub global activate flutter_asset_generator && melos gen-assets
 
 scripts:
+  gen-l10n:
+    run: melos exec --flutter --dir-exists=lib/l10n -- "flutter gen-l10n"
+    description: Generate localizations for the selected packages.
+
+  gen-assets:
+    run: melos run gen-common-assets && melos run gen-apps-assets
+    description: Generate assets for all packages.
+
+  gen-common-assets:
+    env:
+      FILE_NAME_PREFIX: MELOS_PACKAGE_NAME
+      CLASS_NAME: "CommonAssets"
+    run: melos exec --flutter --dir-exists=assets --scope="common" -- \
+      "fgen --no-watch --output lib/gen/${FILE_NAME_PREFIX}_assets.dart --name $CLASS_NAME"
+    description: Generate assets for common package.
+
+  gen-apps-assets:
+    env:
+      FILE_NAME_PREFIX: "my"
+      CLASS_NAME: "MyAssets"
+    run: melos exec -c 1 --flutter --dir-exists=assets --category="apps" -- \
+      "fgen --no-watch --output lib/gen/${FILE_NAME_PREFIX}_assets.dart --name $CLASS_NAME"
+    description: Generate assets for apps category.
+
+  generate:
+    run: melos run generate:dart && melos run generate:flutter
+    description: Build all generated files for all Dart & Flutter packages.
+
+  generate:dart:
+    # We are setting the concurrency to 1 because a higher concurrency can crash
+    # the analysis server on low performance machines (like GitHub Actions).
+    run: melos exec -c 1 --depends-on="build_runner" --no-flutter -- "dart run build_runner build --delete-conflicting-outputs"
+    description: Build all generated files for the selected Dart packages.
+
+  generate:flutter:
+    run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter pub run build_runner build --delete-conflicting-outputs"
+    description: Build all generated files for the selected Flutter packages.
+
   lint:all:
     run: melos run analyze && melos run format
     description: Run all static analysis checks.

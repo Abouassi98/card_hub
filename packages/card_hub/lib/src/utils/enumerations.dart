@@ -1,8 +1,11 @@
+import 'package:dart_mappable/dart_mappable.dart';
 import 'package:flutter/material.dart';
-
 import '../../card_hub.dart';
 import 'app_static_colors.dart';
 
+part 'enumerations.mapper.dart';
+
+@MappableEnum()
 /// Enum representing different types of credit cards.
 enum CardType {
   /// Represents a credit card of an unspecified or unsupported brand.
