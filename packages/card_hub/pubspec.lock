@@ -17,14 +17,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.6.0"
-  ansicolor:
-    dependency: transitive
-    description:
-      name: ansicolor
-      sha256: "50e982d500bc863e1d703448afdbf9e5a72eb48840a4f766fa361ffd6877055f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.3"
   archive:
     dependency: transitive
     description:
@@ -177,22 +169,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
-  dart_mappable:
-    dependency: "direct main"
-    description:
-      name: dart_mappable
-      sha256: "2255b2c00e328a65fef5a8df2dabfc0dc9c2e518c33a50051a4519b1c7a28c48"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.5.0"
-  dart_mappable_builder:
-    dependency: "direct dev"
-    description:
-      name: dart_mappable_builder
-      sha256: adea8c55aac73c8254aa14a8272b788eb0f72799dd8e4810a9b664ec9b4e353c
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.5.0"
   dart_style:
     dependency: transitive
     description:
@@ -264,6 +240,22 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  freezed:
+    dependency: "direct dev"
+    description:
+      name: freezed
+      sha256: "59a584c24b3acdc5250bb856d0d3e9c0b798ed14a4af1ddb7dc1c7b41df91c9c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.5.8"
+  freezed_annotation:
+    dependency: "direct main"
+    description:
+      name: freezed_annotation
+      sha256: c2e2d632dd9b8a2b7751117abcfc2b4888ecfe181bd9fca7170d9ef02e595fe2
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.4"
   frontend_server_client:
     dependency: transitive
     description:
@@ -661,14 +653,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
-  type_plus:
-    dependency: transitive
-    description:
-      name: type_plus
-      sha256: d5d1019471f0d38b91603adb9b5fd4ce7ab903c879d2fbf1a3f80a630a03fcc9
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.1"
   typed_data:
     dependency: transitive
     description:

@@ -112,7 +112,7 @@ class CardHubComponent extends StatelessWidget {
                 image: cardHubStyleData?.logoImage ?? visaMasterCardType.image,
               ),
               const SizedBox(height: Sizes.marginV16),
-              Text(card.bankName ?? '', style: brandedTextStyle),
+              Text(card.bankName , style: brandedTextStyle),
               const SizedBox(height: Sizes.marginV16),
               Text(
                 '${AppConstants.twelveX} ${card.lastFour}',

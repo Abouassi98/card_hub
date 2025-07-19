@@ -5,7 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../card_hub.dart';
 import 'utils/color_extractor.dart';
-import 'utils/local_storage_service.dart';
+import 'utils/shared_preferences_facade.dart';
 import 'utils/styles/styles.dart';
 
 part 'card_hub_style_data.dart';
@@ -43,7 +43,7 @@ class CardHubMotionKitWidget extends HookWidget {
   Widget build(BuildContext context) {
     final selectedCardIndexNotifier = useValueNotifier<int?>(null);
     final selectedCardIndex = useValueListenable(selectedCardIndexNotifier);
-  // --- NEW STATE MANAGEMENT ---
+    // --- NEW STATE MANAGEMENT ---
     // Holds the reordered list of cards, with the default card at the top.
     final reorderedItems = useState<List<CardHubModel>>([]);
     // Holds the unique ID of the default card, loaded from local storage.
@@ -56,9 +56,10 @@ class CardHubMotionKitWidget extends HookWidget {
     useEffect(() {
       Future<void> initialize() async {
         isLoading.value = true;
-
+        await SharedPreferencesFacade.init();
         // 1. Fetch the default card ID from local storage
-        final savedDefaultId = await LocalStorageService.getDefaultCardId();
+        final savedDefaultId =
+            SharedPreferencesFacade.instance.restoreData<String>(SharedPreferencesFacade.defaultCardIdKey);
         defaultCardId.value = savedDefaultId;
 
         // 2. Reorder the initial list based on the default card ID
@@ -105,7 +106,10 @@ class CardHubMotionKitWidget extends HookWidget {
     // --- NEW: Function to set a card as default ---
     Future<void> setDefaultCard(String cardId) async {
       // 1. Save to local storage
-      await LocalStorageService.saveDefaultCardId(cardId);
+      await SharedPreferencesFacade.instance.saveData(
+        key: SharedPreferencesFacade.defaultCardIdKey,
+        value: cardId,
+      );
 
       // 2. Update the state to reflect the change immediately
       defaultCardId.value = cardId;
@@ -118,7 +122,7 @@ class CardHubMotionKitWidget extends HookWidget {
         currentList.insert(0, newDefaultItem);
         reorderedItems.value = currentList;
       }
-      
+
       // 4. Collapse the cards to show the new order
       unSelectCard();
     }
@@ -142,7 +146,7 @@ class CardHubMotionKitWidget extends HookWidget {
                 ),
               ),
             )
-          :  SingleChildScrollView(
+          : SingleChildScrollView(
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -181,7 +185,8 @@ class CardHubMotionKitWidget extends HookWidget {
                             onSetAsDefault: () => setDefaultCard(reorderedItems.value[i].id),
                             onRemoveCard: onRemoveCard,
                             card: reorderedItems.value[i],
-                            brandingPalette: brandingPalettes.value[reorderedItems.value[i].logoAssetPath],
+                            brandingPalette:
+                                brandingPalettes.value[reorderedItems.value[i].logoAssetPath],
                             visaMasterCardType: CardType.values.firstWhere(
                               (element) => element.name == reorderedItems.value[i].type.name,
                             ),

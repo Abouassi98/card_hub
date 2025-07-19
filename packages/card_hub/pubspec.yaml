@@ -19,7 +19,8 @@ dependencies:
   image: ^4.2.0
 
   # StateManagement & DI
-  dart_mappable: ^4.5.0
+  
+  freezed_annotation: ^2.4.1
   flutter_hooks: ^0.21.2
   shared_preferences: ^2.5.3
 
@@ -39,7 +40,7 @@ dev_dependencies:
 
   # Code gen
   build_runner: ^2.5.4
-  dart_mappable_builder: ^4.5.0
+  freezed: ^2.4.8
 
   
 
