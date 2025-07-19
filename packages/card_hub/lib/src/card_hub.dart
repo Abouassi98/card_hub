@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import '../card_hub.dart';
+import 'utils/color_extractor.dart';
 import 'utils/styles/styles.dart';
-
 part 'card_hub_style_data.dart';
 
 /// A widget representing a motion kit for credit cards.
@@ -33,8 +33,42 @@ class CardHubMotionKitWidget extends HookWidget {
     final selectedCardIndexNotifier = useValueNotifier<int?>(null);
     final selectedCardIndex = useValueListenable(selectedCardIndexNotifier);
 
+    // 👇 State will now hold the raw Color, not a ColorScheme
+    final brandingColors = useState<Map<String, Color>>({});
+    final isLoading = useState<bool>(true);
+
+    useEffect(() {
+      Future<void> generateBranding() async {
+        isLoading.value = true;
+        final newColors = <String, Color>{};
+        final uniqueLogoPaths = items.map((item) => item.logoAssetPath).toSet();
+
+        for (final path in uniqueLogoPaths) {
+          if (newColors.containsKey(path)) {
+            continue;
+          }
+          try {
+            // Extract the color and store it directly
+            newColors[path] = await ColorExtractor.extractColor(path);
+          } catch (e) {
+            debugPrint('Could not process logo $path: $e');
+          }
+        }
+        brandingColors.value = newColors;
+        isLoading.value = false;
+      }
+
+      generateBranding();
+      return null;
+    }, [items]);
+
     void unSelectCard() {
       selectedCardIndexNotifier.value = null;
+    }
+
+    // You can show a loader while colors are being extracted
+    if (isLoading.value) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
@@ -85,6 +119,7 @@ class CardHubMotionKitWidget extends HookWidget {
                           child: CardHubComponent(
                             isSelected: i == selectedCardIndex,
                             onRemoveCard: onRemoveCard,
+                            brandingColor: brandingColors.value[items[i].logoAssetPath],
                             card: items[i],
                             visaMasterCardType: CardType.values.firstWhere(
                               (element) => element.name == items[i].type.name,

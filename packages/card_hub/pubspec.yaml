@@ -11,26 +11,34 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # DI  
-  flutter_hooks: ^0.21.2
 
   # Images
   flutter_svg: ^2.2.0
+  image: ^4.2.0
 
   # StateManagement & DI
   dart_mappable: ^4.5.0
+  flutter_hooks: ^0.21.2
+
+ 
+
+
+
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  # Lints 
-  flutter_lints: ^6.0.0
+
+  # Lints
+
+  
 
   # Code gen
   build_runner: ^2.5.4
   dart_mappable_builder: ^4.5.0
 
+  
 
 
 

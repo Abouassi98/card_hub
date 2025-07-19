@@ -14,6 +14,8 @@ class CardHubLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSvg = image.toLowerCase().endsWith('.svg');
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
@@ -25,7 +27,10 @@ class CardHubLogo extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.only(top: Sizes.paddingV8, right: Sizes.paddingH8),
-          child: SvgPicture.asset(image, package: AppConstants.packageName, height: 50, width: 50),
+          // 👈 Conditionally render based on image type
+          child: isSvg
+              ? SvgPicture.asset(image, height: 50, width: 50)
+              : Image.asset(image, height: 50, width: 50),
         ),
       ],
     );

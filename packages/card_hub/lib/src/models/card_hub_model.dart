@@ -17,6 +17,7 @@ class CardHubModel {
     required this.cardHolderName,
     required this.type,
     required this.bankName,
+    required this.logoAssetPath,
   });
 
   /// A string indicating number on the card.
@@ -38,4 +39,8 @@ class CardHubModel {
 
   /// A string indicating name of the bank.
   final String? bankName;
+
+  /// The local asset path for the card's brand logo (e.g., 'assets/logos/netflix.png').
+  /// If provided, the card will be themed based on this logo.
+  final String logoAssetPath;
 }

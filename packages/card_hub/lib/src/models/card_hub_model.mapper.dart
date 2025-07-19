@@ -38,6 +38,9 @@ class CardHubModelMapper extends ClassMapperBase<CardHubModel> {
   static String? _$bankName(CardHubModel v) => v.bankName;
   static const Field<CardHubModel, String> _f$bankName =
       Field('bankName', _$bankName);
+  static String _$logoAssetPath(CardHubModel v) => v.logoAssetPath;
+  static const Field<CardHubModel, String> _f$logoAssetPath =
+      Field('logoAssetPath', _$logoAssetPath);
 
   @override
   final MappableFields<CardHubModel> fields = const {
@@ -47,6 +50,7 @@ class CardHubModelMapper extends ClassMapperBase<CardHubModel> {
     #cardHolderName: _f$cardHolderName,
     #type: _f$type,
     #bankName: _f$bankName,
+    #logoAssetPath: _f$logoAssetPath,
   };
 
   static CardHubModel _instantiate(DecodingData data) {
@@ -56,7 +60,8 @@ class CardHubModelMapper extends ClassMapperBase<CardHubModel> {
         expirationYear: data.dec(_f$expirationYear),
         cardHolderName: data.dec(_f$cardHolderName),
         type: data.dec(_f$type),
-        bankName: data.dec(_f$bankName));
+        bankName: data.dec(_f$bankName),
+        logoAssetPath: data.dec(_f$logoAssetPath));
   }
 
   @override
@@ -118,7 +123,8 @@ abstract class CardHubModelCopyWith<$R, $In extends CardHubModel, $Out>
       int? expirationYear,
       String? cardHolderName,
       CardType? type,
-      String? bankName});
+      String? bankName,
+      String? logoAssetPath});
   CardHubModelCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
 }
 
@@ -137,14 +143,16 @@ class _CardHubModelCopyWithImpl<$R, $Out>
           int? expirationYear,
           String? cardHolderName,
           CardType? type,
-          Object? bankName = $none}) =>
+          Object? bankName = $none,
+          String? logoAssetPath}) =>
       $apply(FieldCopyWithData({
         if (lastFour != null) #lastFour: lastFour,
         if (expirationMonth != null) #expirationMonth: expirationMonth,
         if (expirationYear != null) #expirationYear: expirationYear,
         if (cardHolderName != null) #cardHolderName: cardHolderName,
         if (type != null) #type: type,
-        if (bankName != $none) #bankName: bankName
+        if (bankName != $none) #bankName: bankName,
+        if (logoAssetPath != null) #logoAssetPath: logoAssetPath
       }));
   @override
   CardHubModel $make(CopyWithData data) => CardHubModel(
@@ -153,7 +161,8 @@ class _CardHubModelCopyWithImpl<$R, $Out>
       expirationYear: data.get(#expirationYear, or: $value.expirationYear),
       cardHolderName: data.get(#cardHolderName, or: $value.cardHolderName),
       type: data.get(#type, or: $value.type),
-      bankName: data.get(#bankName, or: $value.bankName));
+      bankName: data.get(#bankName, or: $value.bankName),
+      logoAssetPath: data.get(#logoAssetPath, or: $value.logoAssetPath));
 
   @override
   CardHubModelCopyWith<$R2, CardHubModel, $Out2> $chain<$R2, $Out2>(

@@ -1,15 +1,9 @@
 name: card_hub_workspace
-repository: https://github.com/Abouassi98/card_hub_demo
+repository: https://github.com/Abouassi98/card_hub
 
 packages:
   - packages/**
   - examples/**
-
-categories:
-  apps:
-    - examples/*
-  packages:
-    - packages/*
 
     
 command:
@@ -22,23 +16,6 @@ command:
     environment:
       sdk: ">=3.8.1 <4.0.0"
       flutter: ">=3.32.5"
-    dependencies:
-      # DI  
-      flutter_hooks: ^0.21.2
-
-      # Images
-      flutter_svg: ^2.2.0
-
-      # StateManagement & DI
-      dart_mappable: ^4.5.0
-
-    dev_dependencies:
-      # Lints 
-      flutter_lints: ^6.0.0
-
-      # Code gen
-      build_runner: ^2.5.4
-      dart_mappable_builder: ^4.5.0
 
     hooks:
       post: |
