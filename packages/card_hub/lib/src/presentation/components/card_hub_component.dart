@@ -14,6 +14,8 @@ class CardHubComponent extends StatelessWidget {
     required this.card,
     required this.visaMasterCardType,
     required this.isSelected,
+    required this.isDefault, // New: To show a "Default" badge
+    required this.onSetAsDefault, // New: Callback to set this card as default
     this.onRemoveCard,
     this.cardHubStyleData,
     this.brandingPalette,
@@ -39,6 +41,16 @@ class CardHubComponent extends StatelessWidget {
   ///
   /// If `true`, a remove icon is displayed on the card.
   final bool isSelected;
+
+  /// A boolean that indicates whether the card is the default card.
+  ///
+  /// If `true`, a "Default" badge is displayed on the card.
+  final bool isDefault;
+
+  /// A callback function that is triggered when the default icon is tapped.
+  ///
+  /// The default icon is only visible when [isDefault] is `true`.
+  final void Function()? onSetAsDefault;
 
   /// A Material 3 ColorScheme generated from the card's logo.
   /// If provided, it overrides the default gradient.
@@ -87,10 +99,9 @@ class CardHubComponent extends StatelessWidget {
             ),
           ),
           width: cardHubStyleData?.width ?? MediaQuery.sizeOf(context).width * 0.9,
-          margin: 
-              const EdgeInsets.symmetric(
-                horizontal: Sizes.paddingH20,
-              ).copyWith(top: Sizes.paddingV10),
+          margin: const EdgeInsets.symmetric(
+            horizontal: Sizes.paddingH20,
+          ).copyWith(top: Sizes.paddingV10),
           padding:
               cardHubStyleData?.padding ?? const EdgeInsets.only(left: 16, right: 16, bottom: 22),
           child: Column(
@@ -129,18 +140,32 @@ class CardHubComponent extends StatelessWidget {
             ],
           ),
         ),
-        if (isSelected)
+            // Show "Set as Default" button only when the card is selected
+        // and it is NOT already the default card.
+        if (!isDefault && isSelected)
           Positioned(
             right: 10,
             child: InkWell(
-              onTap: onRemoveCard,
+              onTap: onSetAsDefault,
               child: const CircleAvatar(
                 backgroundColor: Colors.red,
                 radius: Sizes.cardR16,
-                child: Icon(Icons.remove, color: Colors.white),
+                child: Icon(Icons.done, color: Colors.white),
               ),
             ),
           ),
+        // Show "Default" chip if it's the default card
+        if (isDefault)
+          const Positioned(
+            right: 10,
+            child: CircleAvatar(
+              backgroundColor: Colors.green,
+              radius: Sizes.cardR16,
+              child: Icon(Icons.star, color: Colors.white),
+            ),
+          ),
+
+    
       ],
     );
   }

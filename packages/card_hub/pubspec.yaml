@@ -21,6 +21,7 @@ dependencies:
   # StateManagement & DI
   dart_mappable: ^4.5.0
   flutter_hooks: ^0.21.2
+  shared_preferences: ^2.5.3
 
  
 

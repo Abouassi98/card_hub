@@ -11,6 +11,7 @@ part 'card_hub_model.mapper.dart';
 class CardHubModel {
   /// Constructs a [CardHubModel].
   CardHubModel({
+    required this.id,
     required this.lastFour,
     required this.expirationMonth,
     required this.expirationYear,
@@ -19,6 +20,9 @@ class CardHubModel {
     required this.bankName,
     required this.logoAssetPath,
   });
+
+  /// A unique identifier for the card.
+  final String id;
 
   /// A string indicating number on the card.
   final int lastFour;

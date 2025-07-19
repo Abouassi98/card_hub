@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
       home: CardHubMotionKitWidget(
         items: [
           CardHubModel(
+            id: '1',
             lastFour: 1,
             expirationMonth: 08,
             expirationYear: 2026,

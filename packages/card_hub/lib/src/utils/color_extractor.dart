@@ -9,11 +9,8 @@ Future<List<Color>> decodeAndExtractCleanPalette(ByteData imageBytes) async {
 }
 
 /// A utility class to extract a clean, aesthetically-pleasing color palette from an image.
-///
-/// This version uses a simpler, more robust algorithm that filters by RGB and finds the
-/// most dominant, non-neutral color.
 class ColorExtractor {
-  /// Extracts the most dominant, non-black/non-white color and creates a gradient palette.
+  /// Extracts the most dominant colors from an image to create a gradient palette.
   static Future<List<Color>> extractCleanPalette(ByteData byteData) async {
     // A fallback color in case of any processing failure.
     final fallbackPalette = [Colors.blueGrey.shade700, Colors.blueGrey.shade900];
@@ -30,16 +27,15 @@ class ColorExtractor {
 
       for (final pixel in resizedImage) {
         // --- 1. Primary Filtering ---
-        // Ignore any pixel that is not fully opaque.
-        if (pixel.a < 250) continue;
+        if (pixel.a < 250) {
+          continue;
+        }
 
         final r = pixel.r.toInt();
         final g = pixel.g.toInt();
         final b = pixel.b.toInt();
 
         // --- 2. RGB-based Neutral Color Filtering ---
-        // This is the KEY FIX: We explicitly ignore pixels that are very dark (like the
-        // black background and arrows in `mozodi.png`) or very bright.
         if ((r < 35 && g < 35 && b < 35) || (r > 220 && g > 220 && b > 220)) {
           continue;
         }
@@ -58,21 +54,30 @@ class ColorExtractor {
         return fallbackPalette;
       }
 
-      // --- 4. Find the Most Dominant Color ---
+      // --- 4. Find the Most Dominant Colors ---
       final sortedColors = colorCounts.entries.toList()
         ..sort((a, b) => b.value.compareTo(a.value));
 
-      final primaryColor = Color(sortedColors.first.key);
+      // --- KEY CHANGE ---
+      // If we have two or more distinct, dominant colors, use them.
+      if (sortedColors.length >= 2) {
+        final primaryColor = Color(sortedColors[0].key);
+        final secondaryColor = Color(sortedColors[1].key);
+        return [primaryColor, secondaryColor];
+      }
 
-      // --- 5. Programmatically Create a Gradient ---
-      // We create a second, darker color from the primary one for a nice effect.
-      final hsl = HSLColor.fromColor(primaryColor);
-      final darkerHsl = hsl.withLightness((hsl.lightness * 0.7).clamp(0.0, 1.0));
-
-      return [primaryColor, darkerHsl.toColor()];
+      // If we only found one dominant color, create a gradient from it.
+      if (sortedColors.isNotEmpty) {
+        final primaryColor = Color(sortedColors.first.key);
+        final hsl = HSLColor.fromColor(primaryColor);
+        final darkerHsl = hsl.withLightness((hsl.lightness * 0.7).clamp(0.0, 1.0));
+        return [primaryColor, darkerHsl.toColor()];
+      }
+      
+      return fallbackPalette;
 
     } catch (e) {
-      // If anything goes wrong during processing, return the fallback.
+      debugPrint('Error extracting palette: $e');
       return fallbackPalette;
     }
   }

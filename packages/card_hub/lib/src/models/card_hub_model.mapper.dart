@@ -21,6 +21,8 @@ class CardHubModelMapper extends ClassMapperBase<CardHubModel> {
   @override
   final String id = 'CardHubModel';
 
+  static String _$id(CardHubModel v) => v.id;
+  static const Field<CardHubModel, String> _f$id = Field('id', _$id);
   static int _$lastFour(CardHubModel v) => v.lastFour;
   static const Field<CardHubModel, int> _f$lastFour =
       Field('lastFour', _$lastFour);
@@ -44,6 +46,7 @@ class CardHubModelMapper extends ClassMapperBase<CardHubModel> {
 
   @override
   final MappableFields<CardHubModel> fields = const {
+    #id: _f$id,
     #lastFour: _f$lastFour,
     #expirationMonth: _f$expirationMonth,
     #expirationYear: _f$expirationYear,
@@ -55,6 +58,7 @@ class CardHubModelMapper extends ClassMapperBase<CardHubModel> {
 
   static CardHubModel _instantiate(DecodingData data) {
     return CardHubModel(
+        id: data.dec(_f$id),
         lastFour: data.dec(_f$lastFour),
         expirationMonth: data.dec(_f$expirationMonth),
         expirationYear: data.dec(_f$expirationYear),
@@ -118,7 +122,8 @@ extension CardHubModelValueCopy<$R, $Out>
 abstract class CardHubModelCopyWith<$R, $In extends CardHubModel, $Out>
     implements ClassCopyWith<$R, $In, $Out> {
   $R call(
-      {int? lastFour,
+      {String? id,
+      int? lastFour,
       int? expirationMonth,
       int? expirationYear,
       String? cardHolderName,
@@ -138,7 +143,8 @@ class _CardHubModelCopyWithImpl<$R, $Out>
       CardHubModelMapper.ensureInitialized();
   @override
   $R call(
-          {int? lastFour,
+          {String? id,
+          int? lastFour,
           int? expirationMonth,
           int? expirationYear,
           String? cardHolderName,
@@ -146,6 +152,7 @@ class _CardHubModelCopyWithImpl<$R, $Out>
           Object? bankName = $none,
           String? logoAssetPath}) =>
       $apply(FieldCopyWithData({
+        if (id != null) #id: id,
         if (lastFour != null) #lastFour: lastFour,
         if (expirationMonth != null) #expirationMonth: expirationMonth,
         if (expirationYear != null) #expirationYear: expirationYear,
@@ -156,6 +163,7 @@ class _CardHubModelCopyWithImpl<$R, $Out>
       }));
   @override
   CardHubModel $make(CopyWithData data) => CardHubModel(
+      id: data.get(#id, or: $value.id),
       lastFour: data.get(#lastFour, or: $value.lastFour),
       expirationMonth: data.get(#expirationMonth, or: $value.expirationMonth),
       expirationYear: data.get(#expirationYear, or: $value.expirationYear),
