@@ -3,66 +3,77 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 
-/// A utility class to extract the dominant color from an image asset.
+/// Isolate entry point for the new, simplified color extraction logic.
+Future<List<Color>> decodeAndExtractCleanPalette(ByteData imageBytes) async {
+  return ColorExtractor.extractCleanPalette(imageBytes);
+}
+
+/// A utility class to extract a clean, aesthetically-pleasing color palette from an image.
+///
+/// This version uses a simpler, more robust algorithm that filters by RGB and finds the
+/// most dominant, non-neutral color.
 class ColorExtractor {
-  /// Extracts the dominant color from the image at the given [assetPath].
-  static Future<Color> extractColor(String assetPath) async {
-    final byteData = await rootBundle.load(assetPath);
-    final image = img.decodeImage(byteData.buffer.asUint8List());
+  /// Extracts the most dominant, non-black/non-white color and creates a gradient palette.
+  static Future<List<Color>> extractCleanPalette(ByteData byteData) async {
+    // A fallback color in case of any processing failure.
+    final fallbackPalette = [Colors.blueGrey.shade700, Colors.blueGrey.shade900];
 
-    if (image == null) {
-      throw Exception('Could not decode image from asset: $assetPath');
-    }
+    try {
+      final image = img.decodeImage(byteData.buffer.asUint8List());
 
-    final resizedImage = img.copyResize(image, width: 64);
-    final colorCounts = <int, int>{};
-    int maxCount = 0;
-    int dominantColor = Colors.blue.value; // Fallback default color
-
-    for (final pixel in resizedImage) {
-      final r = pixel.r.toInt();
-      final g = pixel.g.toInt();
-      final b = pixel.b.toInt();
-
-      // 👇 --- New Logic: Ignore Black and White ---
-      // This threshold helps ignore pure black or white backgrounds.
-      // If a color is very dark (all channels below 10) or very light
-      // (all channels above 245), we skip it.
-      if ((r < 10 && g < 10 && b < 10) || (r > 245 && g > 245 && b > 245)) {
-        continue; // Skip this pixel
+      if (image == null) {
+        return fallbackPalette;
       }
-      // --- End of New Logic ---
 
-      // We still quantize to group similar colors
-      final quantizedR = (r ~/ 16) * 16;
-      final quantizedG = (g ~/ 16) * 16;
-      final quantizedB = (b ~/ 16) * 16;
-      final quantizedColor = (0xFF << 24) | (quantizedR << 16) | (quantizedG << 8) | quantizedB;
+      final resizedImage = img.copyResize(image, width: 64);
+      final colorCounts = <int, int>{};
 
-      final count = (colorCounts[quantizedColor] ?? 0) + 1;
-      colorCounts[quantizedColor] = count;
-
-      if (count > maxCount) {
-        maxCount = count;
-        dominantColor = quantizedColor;
-      }
-    }
-
-    // If the image was ONLY black and white, we might not have a dominant color.
-    // In that case, we can find the average color as a fallback.
-    if (colorCounts.isEmpty) {
-      num totalR = 0, totalG = 0, totalB = 0;
       for (final pixel in resizedImage) {
-        totalR += pixel.r;
-        totalG += pixel.g;
-        totalB += pixel.b;
-      }
-      final avgR = totalR ~/ resizedImage.length;
-      final avgG = totalG ~/ resizedImage.length;
-      final avgB = totalB ~/ resizedImage.length;
-      return Color.fromARGB(255, avgR, avgG, avgB);
-    }
+        // --- 1. Primary Filtering ---
+        // Ignore any pixel that is not fully opaque.
+        if (pixel.a < 250) continue;
 
-    return Color(dominantColor);
+        final r = pixel.r.toInt();
+        final g = pixel.g.toInt();
+        final b = pixel.b.toInt();
+
+        // --- 2. RGB-based Neutral Color Filtering ---
+        // This is the KEY FIX: We explicitly ignore pixels that are very dark (like the
+        // black background and arrows in `mozodi.png`) or very bright.
+        if ((r < 35 && g < 35 && b < 35) || (r > 220 && g > 220 && b > 220)) {
+          continue;
+        }
+
+        // --- 3. Quantize and Count the Remaining Colors ---
+        const step = 20;
+        final quantizedColor = (0xFF << 24) |
+            (((r ~/ step) * step) << 16) |
+            (((g ~/ step) * step) << 8) |
+            ((b ~/ step) * step);
+        
+        colorCounts[quantizedColor] = (colorCounts[quantizedColor] ?? 0) + 1;
+      }
+
+      if (colorCounts.isEmpty) {
+        return fallbackPalette;
+      }
+
+      // --- 4. Find the Most Dominant Color ---
+      final sortedColors = colorCounts.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+
+      final primaryColor = Color(sortedColors.first.key);
+
+      // --- 5. Programmatically Create a Gradient ---
+      // We create a second, darker color from the primary one for a nice effect.
+      final hsl = HSLColor.fromColor(primaryColor);
+      final darkerHsl = hsl.withLightness((hsl.lightness * 0.7).clamp(0.0, 1.0));
+
+      return [primaryColor, darkerHsl.toColor()];
+
+    } catch (e) {
+      // If anything goes wrong during processing, return the fallback.
+      return fallbackPalette;
+    }
   }
 }

@@ -1,13 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+
 import '../card_hub.dart';
 import 'utils/color_extractor.dart';
 import 'utils/styles/styles.dart';
+
 part 'card_hub_style_data.dart';
 
-/// A widget representing a motion kit for credit cards.
 class CardHubMotionKitWidget extends HookWidget {
-  /// Constructs a [CardHubMotionKitWidget].
   const CardHubMotionKitWidget({
     super.key,
     required this.items,
@@ -15,46 +17,41 @@ class CardHubMotionKitWidget extends HookWidget {
     this.onRemoveCard,
   });
 
-  /// The list of credit card models.
   final List<CardHubModel> items;
-
-  /// The style configuration for the credit card widgets.
-  /// Provides custom width, padding, margin, animation, and more.
   final CardHubStyleData? cardHubStyleData;
-
-  /// Callback triggered when a card is removed from the UI.
   final void Function()? onRemoveCard;
 
-  /// Builds the widget tree for the CardHub motion kit UI.
-  ///
-  /// Returns a [Scaffold] containing a stack of animated credit card widgets and selection logic.
   @override
   Widget build(BuildContext context) {
     final selectedCardIndexNotifier = useValueNotifier<int?>(null);
     final selectedCardIndex = useValueListenable(selectedCardIndexNotifier);
 
-    // 👇 State will now hold the raw Color, not a ColorScheme
-    final brandingColors = useState<Map<String, Color>>({});
+    // State now holds a map of asset paths to a List<Color> palette.
+    final brandingPalettes = useState<Map<String, List<Color>>>({});
     final isLoading = useState<bool>(true);
 
-    useEffect(() {
+ useEffect(() {
       Future<void> generateBranding() async {
         isLoading.value = true;
-        final newColors = <String, Color>{};
         final uniqueLogoPaths = items.map((item) => item.logoAssetPath).toSet();
 
-        for (final path in uniqueLogoPaths) {
-          if (newColors.containsKey(path)) {
-            continue;
-          }
+        final processingFutures = uniqueLogoPaths.map((path) async {
           try {
-            // Extract the color and store it directly
-            newColors[path] = await ColorExtractor.extractColor(path);
+            final byteData = await rootBundle.load(path);
+            // **KEY CHANGE**: Call the new 'decodeAndExtractCleanPalette' function
+            final palette = await compute(decodeAndExtractCleanPalette, byteData);
+            return MapEntry(path, palette);
           } catch (e) {
             debugPrint('Could not process logo $path: $e');
+            return null;
           }
-        }
-        brandingColors.value = newColors;
+        }).toList();
+
+        final results = await Future.wait(processingFutures);
+
+        final newPalettes = Map.fromEntries(results.whereType<MapEntry<String, List<Color>>>());
+
+        brandingPalettes.value = newPalettes;
         isLoading.value = false;
       }
 
@@ -66,9 +63,10 @@ class CardHubMotionKitWidget extends HookWidget {
       selectedCardIndexNotifier.value = null;
     }
 
-    // You can show a loader while colors are being extracted
     if (isLoading.value) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     return Scaffold(
@@ -119,8 +117,9 @@ class CardHubMotionKitWidget extends HookWidget {
                           child: CardHubComponent(
                             isSelected: i == selectedCardIndex,
                             onRemoveCard: onRemoveCard,
-                            brandingColor: brandingColors.value[items[i].logoAssetPath],
                             card: items[i],
+                            // Pass the extracted palette to the component.
+                            brandingPalette: brandingPalettes.value[items[i].logoAssetPath],
                             visaMasterCardType: CardType.values.firstWhere(
                               (element) => element.name == items[i].type.name,
                             ),

@@ -1,10 +1,12 @@
 name: card_hub
 description: A starting point for Dart libraries or applications.
 version: 0.1.0
-# repository: https://github.com/my_org/my_repo
+repository: https://github.com/Abouassi98/card_hub
+issue_tracker: https://github.com/Abouassi98/card_hub/issues
 
 environment:
-  sdk: ">=3.8.1 <4.0.0"
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
 
 # Add regular dependencies here.
 dependencies:

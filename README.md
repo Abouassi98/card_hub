@@ -1,4 +1,4 @@
-# card_hub_demo
+# card_hub
 
 A new Flutter project.
 
