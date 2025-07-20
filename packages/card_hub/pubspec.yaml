@@ -15,7 +15,7 @@ dependencies:
 
 
   # Images
-  flutter_svg: ^2.2.0
+  flutter_svg: ^2.1.0
   image: ^4.2.0
 
   # StateManagement & DI
@@ -39,7 +39,7 @@ dev_dependencies:
   
 
   # Code gen
-  build_runner: ^2.5.4
+  build_runner: ^2.4.13
   freezed: ^2.4.8
 
   
