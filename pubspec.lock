@@ -37,10 +37,10 @@ packages:
     dependency: transitive
     description:
       name: checked_yaml
-      sha256: "959525d3162f249993882720d52b7e0c833978df229be20702b33d48d91de70f"
+      sha256: feb6bed21949061731a7a75fc5d2aa727cf160b91af9a3e464c5e3a32e28b5ff
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.4"
+    version: "2.0.3"
   cli_launcher:
     dependency: transitive
     description:
@@ -57,6 +57,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.2"
+  clock:
+    dependency: transitive
+    description:
+      name: clock
+      sha256: fddb70d9b5277016c77a80201021d40a2247104d9f4aa7bab7157b7e3f05b84b
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.2"
   collection:
     dependency: transitive
     description:
@@ -69,10 +77,10 @@ packages:
     dependency: transitive
     description:
       name: conventional_commit
-      sha256: c40b1b449ce2a63fa2ce852f35e3890b1e182f5951819934c0e4a66254bc0dc3
+      sha256: dec15ad1118f029c618651a4359eb9135d8b88f761aa24e4016d061cd45948f2
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.1+1"
+    version: "0.6.0+1"
   file:
     dependency: transitive
     description:
@@ -113,6 +121,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: d6f56758b7d3014a48af9701c085700aac781a92a87a62b1333b46d8879661cf
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.19.0"
   io:
     dependency: transitive
     description:
@@ -133,10 +149,10 @@ packages:
     dependency: "direct dev"
     description:
       name: melos
-      sha256: "4280dc46bd5b741887cce1e67e5c1a6aaf3c22310035cf5bd33dceeeda62ed22"
+      sha256: "3f3ab3f902843d1e5a1b1a4dd39a4aca8ba1056f2d32fd8995210fa2843f646f"
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.3"
+    version: "6.3.2"
   meta:
     dependency: transitive
     description:
@@ -205,18 +221,18 @@ packages:
     dependency: transitive
     description:
       name: pub_updater
-      sha256: "739a0161d73a6974c0675b864fb0cf5147305f7b077b7f03a58fa7a9ab3e7e7d"
+      sha256: "54e8dc865349059ebe7f163d6acce7c89eb958b8047e6d6e80ce93b13d7c9e60"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.0"
+    version: "0.4.0"
   pubspec_parse:
     dependency: transitive
     description:
       name: pubspec_parse
-      sha256: "0560ba233314abbed0a48a2956f7f022cce7c3e1e73df540277da7544cad4082"
+      sha256: "81876843eb50dc2e1e5b151792c9a985c5ed2536914115ed04e9c8528f6647b0"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.0"
+    version: "1.4.0"
   source_span:
     dependency: transitive
     description:
@@ -282,5 +298,5 @@ packages:
     source: hosted
     version: "2.2.2"
 sdks:
-  dart: ">=3.8.0 <4.0.0"
+  dart: ">=3.5.0 <4.0.0"
   flutter: ">=3.22.0"
