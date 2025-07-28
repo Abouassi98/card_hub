@@ -21,7 +21,7 @@ dependencies:
   # StateManagement & DI
   
   freezed_annotation: ^2.4.1
-  flutter_hooks: ^0.21.2
+  flutter_hooks: ^0.20.5
   shared_preferences: ^2.5.3
 
  
