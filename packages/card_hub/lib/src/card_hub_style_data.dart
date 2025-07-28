@@ -1,4 +1,4 @@
-part of 'card_hub.dart';
+import 'package:flutter/material.dart';
 
 /// A class that defines the visual style configuration for a credit card widget.
 class CardHubStyleData {

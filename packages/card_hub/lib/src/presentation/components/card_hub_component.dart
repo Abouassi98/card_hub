@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../card_hub.dart';
+import '../../card_hub_style_data.dart';
+import '../../models/card_hub_model.dart';
 import '../../utils/constants.dart';
+import '../../utils/enumerations.dart';
 import '../../utils/styles/styles.dart';
+import '../widgets/card_hub_details_widget.dart';
+import '../widgets/card_hub_logo_widget.dart';
 
 /// A widget that displays a customizable credit card component.
 ///

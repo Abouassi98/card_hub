@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Credit Hub',
-      home: CardHubMotionKitWidget(
+      home: CardHub(
         items: [
           CardHubModel(
             id: '1',

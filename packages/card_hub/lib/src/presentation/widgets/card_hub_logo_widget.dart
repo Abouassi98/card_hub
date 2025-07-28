@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import '../../../card_hub.dart';
+import '../../utils/asset_paths.dart';
 import '../../utils/constants.dart';
 import '../../utils/styles/styles.dart';
 
