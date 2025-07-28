@@ -3,23 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../card_hub.dart';
+
+import 'card_hub_style_data.dart';
+import 'models/card_hub_model.dart';
+import 'presentation/components/card_hub_component.dart';
+import 'presentation/helpers/card_hub_layout_helper.dart';
+import 'utils/card_configs.dart';
 import 'utils/color_extractor.dart';
+import 'utils/enumerations.dart';
 import 'utils/shared_preferences_facade.dart';
 import 'utils/styles/styles.dart';
 
-part 'card_hub_style_data.dart';
+
 
 /// A widget that displays a collection of cards with motion effects, offering a
 /// visually engaging way to present a list of [CardHubModel] items.
 ///
 /// This widget is designed to be highly customizable through [cardHubStyleData]
 /// and supports interactive features like card selection and removal.
-class CardHubMotionKitWidget extends HookWidget {
-  /// Creates a [CardHubMotionKitWidget].
+class CardHub extends HookWidget {
+  /// Creates a [CardHub].
   ///
   /// The [items] parameter is required and provides the data for the cards.
-  const CardHubMotionKitWidget({
+  const CardHub({
     super.key,
     required this.items,
     this.cardHubStyleData,

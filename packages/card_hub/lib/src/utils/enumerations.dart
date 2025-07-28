@@ -1,7 +1,8 @@
 
 import 'package:flutter/material.dart';
-import '../../card_hub.dart';
+
 import 'app_static_colors.dart';
+import 'asset_paths.dart';
 
 
 
