@@ -41,7 +41,14 @@ mixin _$CardHubModel {
 
   /// The local asset path for the card's brand logo (e.g., 'assets/logos/netflix.png').
   /// If provided, the card will be themed based on this logo.
-  String get logoAssetPath => throw _privateConstructorUsedError;
+  String? get logoAssetPath => throw _privateConstructorUsedError;
+
+  /// The color of the card. If provided, the card will be themed based on this color.
+  Color? get cardColor => throw _privateConstructorUsedError;
+
+  /// Optional callback function that is triggered when a card is selected.
+  void Function(CardHubModel)? get onCardTap =>
+      throw _privateConstructorUsedError;
 
   /// Create a copy of CardHubModel
   /// with the given fields replaced by the non-null parameter values.
@@ -64,7 +71,9 @@ abstract class $CardHubModelCopyWith<$Res> {
       String cardHolderName,
       CardType type,
       String bankName,
-      String logoAssetPath});
+      String? logoAssetPath,
+      Color? cardColor,
+      void Function(CardHubModel)? onCardTap});
 }
 
 /// @nodoc
@@ -89,7 +98,9 @@ class _$CardHubModelCopyWithImpl<$Res, $Val extends CardHubModel>
     Object? cardHolderName = null,
     Object? type = null,
     Object? bankName = null,
-    Object? logoAssetPath = null,
+    Object? logoAssetPath = freezed,
+    Object? cardColor = freezed,
+    Object? onCardTap = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -120,10 +131,18 @@ class _$CardHubModelCopyWithImpl<$Res, $Val extends CardHubModel>
           ? _value.bankName
           : bankName // ignore: cast_nullable_to_non_nullable
               as String,
-      logoAssetPath: null == logoAssetPath
+      logoAssetPath: freezed == logoAssetPath
           ? _value.logoAssetPath
           : logoAssetPath // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
+      cardColor: freezed == cardColor
+          ? _value.cardColor
+          : cardColor // ignore: cast_nullable_to_non_nullable
+              as Color?,
+      onCardTap: freezed == onCardTap
+          ? _value.onCardTap
+          : onCardTap // ignore: cast_nullable_to_non_nullable
+              as void Function(CardHubModel)?,
     ) as $Val);
   }
 }
@@ -144,7 +163,9 @@ abstract class _$$CardHubModelImplCopyWith<$Res>
       String cardHolderName,
       CardType type,
       String bankName,
-      String logoAssetPath});
+      String? logoAssetPath,
+      Color? cardColor,
+      void Function(CardHubModel)? onCardTap});
 }
 
 /// @nodoc
@@ -167,7 +188,9 @@ class __$$CardHubModelImplCopyWithImpl<$Res>
     Object? cardHolderName = null,
     Object? type = null,
     Object? bankName = null,
-    Object? logoAssetPath = null,
+    Object? logoAssetPath = freezed,
+    Object? cardColor = freezed,
+    Object? onCardTap = freezed,
   }) {
     return _then(_$CardHubModelImpl(
       id: null == id
@@ -198,17 +221,25 @@ class __$$CardHubModelImplCopyWithImpl<$Res>
           ? _value.bankName
           : bankName // ignore: cast_nullable_to_non_nullable
               as String,
-      logoAssetPath: null == logoAssetPath
+      logoAssetPath: freezed == logoAssetPath
           ? _value.logoAssetPath
           : logoAssetPath // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
+      cardColor: freezed == cardColor
+          ? _value.cardColor
+          : cardColor // ignore: cast_nullable_to_non_nullable
+              as Color?,
+      onCardTap: freezed == onCardTap
+          ? _value.onCardTap
+          : onCardTap // ignore: cast_nullable_to_non_nullable
+              as void Function(CardHubModel)?,
     ));
   }
 }
 
 /// @nodoc
 
-class _$CardHubModelImpl implements _CardHubModel {
+class _$CardHubModelImpl extends _CardHubModel {
   const _$CardHubModelImpl(
       {required this.id,
       required this.lastFour,
@@ -217,7 +248,10 @@ class _$CardHubModelImpl implements _CardHubModel {
       required this.cardHolderName,
       required this.type,
       required this.bankName,
-      required this.logoAssetPath});
+      this.logoAssetPath,
+      this.cardColor,
+      this.onCardTap})
+      : super._();
 
   /// A unique identifier for the card.
   @override
@@ -252,11 +286,19 @@ class _$CardHubModelImpl implements _CardHubModel {
   /// The local asset path for the card's brand logo (e.g., 'assets/logos/netflix.png').
   /// If provided, the card will be themed based on this logo.
   @override
-  final String logoAssetPath;
+  final String? logoAssetPath;
+
+  /// The color of the card. If provided, the card will be themed based on this color.
+  @override
+  final Color? cardColor;
+
+  /// Optional callback function that is triggered when a card is selected.
+  @override
+  final void Function(CardHubModel)? onCardTap;
 
   @override
   String toString() {
-    return 'CardHubModel(id: $id, lastFour: $lastFour, expirationMonth: $expirationMonth, expirationYear: $expirationYear, cardHolderName: $cardHolderName, type: $type, bankName: $bankName, logoAssetPath: $logoAssetPath)';
+    return 'CardHubModel(id: $id, lastFour: $lastFour, expirationMonth: $expirationMonth, expirationYear: $expirationYear, cardHolderName: $cardHolderName, type: $type, bankName: $bankName, logoAssetPath: $logoAssetPath, cardColor: $cardColor, onCardTap: $onCardTap)';
   }
 
   @override
@@ -277,12 +319,26 @@ class _$CardHubModelImpl implements _CardHubModel {
             (identical(other.bankName, bankName) ||
                 other.bankName == bankName) &&
             (identical(other.logoAssetPath, logoAssetPath) ||
-                other.logoAssetPath == logoAssetPath));
+                other.logoAssetPath == logoAssetPath) &&
+            (identical(other.cardColor, cardColor) ||
+                other.cardColor == cardColor) &&
+            (identical(other.onCardTap, onCardTap) ||
+                other.onCardTap == onCardTap));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, lastFour, expirationMonth,
-      expirationYear, cardHolderName, type, bankName, logoAssetPath);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      lastFour,
+      expirationMonth,
+      expirationYear,
+      cardHolderName,
+      type,
+      bankName,
+      logoAssetPath,
+      cardColor,
+      onCardTap);
 
   /// Create a copy of CardHubModel
   /// with the given fields replaced by the non-null parameter values.
@@ -293,7 +349,7 @@ class _$CardHubModelImpl implements _CardHubModel {
       __$$CardHubModelImplCopyWithImpl<_$CardHubModelImpl>(this, _$identity);
 }
 
-abstract class _CardHubModel implements CardHubModel {
+abstract class _CardHubModel extends CardHubModel {
   const factory _CardHubModel(
       {required final String id,
       required final int lastFour,
@@ -302,7 +358,10 @@ abstract class _CardHubModel implements CardHubModel {
       required final String cardHolderName,
       required final CardType type,
       required final String bankName,
-      required final String logoAssetPath}) = _$CardHubModelImpl;
+      final String? logoAssetPath,
+      final Color? cardColor,
+      final void Function(CardHubModel)? onCardTap}) = _$CardHubModelImpl;
+  const _CardHubModel._() : super._();
 
   /// A unique identifier for the card.
   @override
@@ -337,7 +396,15 @@ abstract class _CardHubModel implements CardHubModel {
   /// The local asset path for the card's brand logo (e.g., 'assets/logos/netflix.png').
   /// If provided, the card will be themed based on this logo.
   @override
-  String get logoAssetPath;
+  String? get logoAssetPath;
+
+  /// The color of the card. If provided, the card will be themed based on this color.
+  @override
+  Color? get cardColor;
+
+  /// Optional callback function that is triggered when a card is selected.
+  @override
+  void Function(CardHubModel)? get onCardTap;
 
   /// Create a copy of CardHubModel
   /// with the given fields replaced by the non-null parameter values.

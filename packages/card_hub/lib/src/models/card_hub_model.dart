@@ -1,4 +1,5 @@
 // This file is "model.dart"
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../utils/enumerations.dart'; 
@@ -7,35 +8,38 @@ import '../utils/enumerations.dart';
 part 'card_hub_model.freezed.dart';
 
 /// Represents a credit card model.
+
 @freezed
 class CardHubModel with _$CardHubModel {
   /// Constructs a [CardHubModel].
   const factory CardHubModel({
     /// A unique identifier for the card.
     required String id,
-
     /// A string indicating number on the card.
     required int lastFour,
-
     /// The expiration month of the credit card.
     required int expirationMonth,
-
     /// The expiration year of the credit card.
     required int expirationYear,
-
     /// A string indicating name of the card holder.
     required String cardHolderName,
-
     /// Sets type of the card. An small image is shown based on selected type
     /// of the card at bottom right corner. If this is set to null then image
     /// shown automatically based on credit card number.
     required CardType type,
-
     /// A string indicating name of the bank.
     required String bankName,
-
     /// The local asset path for the card's brand logo (e.g., 'assets/logos/netflix.png').
     /// If provided, the card will be themed based on this logo.
-    required String logoAssetPath,
+    String? logoAssetPath,
+    /// The color of the card. If provided, the card will be themed based on this color.
+    Color? cardColor,
+
+    /// Optional callback function that is triggered when a card is selected.
+    void Function(CardHubModel model)? onCardTap,
   }) = _CardHubModel;
+
+  // Add this method to your class:
+  @Assert('!(logoAssetPath != null && cardColor != null)', 'Cannot provide both logoAssetPath and cardColor')
+  const CardHubModel._();
 }

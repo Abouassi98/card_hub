@@ -28,28 +28,17 @@ class SharedPreferencesFacade {
 
   /// The key used to store the default card ID in shared preferences.
   static String defaultCardIdKey = 'defaultCardId';
-  static late final SharedPreferencesFacade _instance;
+  static SharedPreferencesFacade ?_instance;
   final SharedPreferences _sharedPrefs;
 
-  /// Initializes the singleton instance of [SharedPreferencesFacade].
-  ///
-  /// This must be called once in the app's entry point (e.g., `main`) before
-  /// accessing the [instance].
-  static Future<void> init() async {
-    final prefs = await SharedPreferences.getInstance();
-    _instance = SharedPreferencesFacade._(prefs);
-  }
 
-  /// Provides global access to the singleton [SharedPreferencesFacade] instance.
-  static SharedPreferencesFacade get instance {
-    try {
-      return _instance;
-    } catch (_) {
-      throw Exception(
-        'SharedPreferencesFacade.instance was accessed before initialization.\n'
-        'Make sure you called await SharedPreferencesFacade.init() in main().',
-      );
-    }
+
+ /// Lazily gets or creates the singleton instance.
+  static Future<SharedPreferencesFacade> get instance async {
+    _instance ??= SharedPreferencesFacade._(
+      await SharedPreferences.getInstance(),
+    );
+    return _instance!;
   }
 
   /// Saves a value to shared preferences with the specified [key].
