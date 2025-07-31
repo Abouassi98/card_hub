@@ -19,7 +19,8 @@ class CardHubComponent extends StatelessWidget {
     required this.visaMasterCardType,
     required this.isSelected,
     required this.isDefault, // New: To show a "Default" badge
-   
+    this.defaultBadge,
+    this.nonDefaultBadge,
     this.onRemoveCard,
     this.cardHubStyleData,
     this.brandingPalette,
@@ -55,7 +56,11 @@ class CardHubComponent extends StatelessWidget {
   /// If provided, it overrides the default gradient.
   final List<Color>? brandingPalette;
 
+  /// A widget that is displayed on the card when it is the default card.
+  final Widget Function(CardHubModel)? defaultBadge;
 
+  /// A widget that is displayed on the card when it is not the default card.
+  final Widget Function(CardHubModel)? nonDefaultBadge;
 
   /// Builds the widget tree for this component.
   @override
@@ -152,6 +157,12 @@ class CardHubComponent extends StatelessWidget {
             ],
           ),
         ),
+        // Show "Set as Default" button only when the card is selected
+        // and it is NOT already the default card.
+        if (isDefault && isSelected && defaultBadge != null) defaultBadge!(card),
+        // Show "Default" chip if it's the default card
+        if (!isDefault && !isSelected && nonDefaultBadge != null)
+          nonDefaultBadge!(card),
       ],
     );
   }

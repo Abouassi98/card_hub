@@ -26,6 +26,8 @@ class CardHub extends HookWidget {
     this.cardHubStyleData,
     this.onRemoveCard,
     this.loadingWidget,
+    this.defaultBadge,
+    this.nonDefaultBadge,
   });
 
   /// The list of card models to be displayed.
@@ -43,6 +45,12 @@ class CardHub extends HookWidget {
 
   /// An optional widget to display while the cards are being loaded.
   final Widget? loadingWidget;
+
+  /// An optional widget to display when a card is selected.
+  final Widget Function(CardHubModel)? defaultBadge;
+
+  /// An optional widget to display when a card is not selected.
+  final Widget Function(CardHubModel)? nonDefaultBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +175,8 @@ class CardHub extends HookWidget {
                     items[i].onCardTap?.call(items[i]);
                   },
                   child: CardHubComponent(
+                    defaultBadge: defaultBadge,
+                    nonDefaultBadge: nonDefaultBadge,
                     isSelected: i == selectedCardIndex,
                     // --- PASS UPDATED PROPS ---
                     isDefault: items[i].id == defaultCardId.value,
