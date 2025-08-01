@@ -1,5 +1,5 @@
 name: card_hub
-description: A starting point for Dart libraries or applications.
+description: A Flutter package that provides a visually engaging and animated way to display credit/debit cards. Perfect for payment apps, digital wallets, or any application that needs to showcase payment cards in an elegant manner.
 version: 0.1.0
 repository: https://github.com/Abouassi98/card_hub
 issue_tracker: https://github.com/Abouassi98/card_hub/issues
