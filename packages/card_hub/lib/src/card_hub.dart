@@ -121,11 +121,8 @@ class _CardHubState extends State<CardHub> {
     }
     
     if (sortedList.every(
-        (item) => item.logoAssetPath != null && item.cardColor == null)) {
-      assert(
-          widget.items.every((item) =>
-              item.logoAssetPath != null && item.cardColor == null),
-          'if CardHub cardColor is null then logoAssetPath must not be null');
+        (item) => item.logoAssetPath != null)) {
+
           
       // 3. Generate color palettes
       final uniqueLogoPaths =
