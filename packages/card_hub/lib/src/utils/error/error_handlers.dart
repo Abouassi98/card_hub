@@ -1,4 +1,5 @@
 import 'app_exception.dart';
+import 'local_exception_type.dart';
 
 /// Extension on [Object] to convert errors to [AppException].
 extension LocalErrorExtension on Object {
@@ -7,7 +8,7 @@ extension LocalErrorExtension on Object {
 
     return error is AppException
         ? error
-        : AppException.localException(
+        : LocalException(
             type: LocalExceptionType.unknown,
             message: error.toString(),
           );

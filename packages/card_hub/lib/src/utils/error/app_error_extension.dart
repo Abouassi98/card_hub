@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_exception.dart';
+import 'local_exception_type.dart';
 
 /// Extension on [Object] to provide a user-friendly error message.
 extension AppErrorExtension on Object? {
@@ -10,17 +11,15 @@ extension AppErrorExtension on Object? {
   /// specific error message. Otherwise, it returns a generic 'Unknown error' message.
   String errorMessage(BuildContext context) {
     final error = this;
-    if (error is AppException) {
-      return error.map(
-        localException: (ex) => ex.localErrorMessage(context),
-      );
+    if (error is LocalException) {
+      return error.localErrorMessage(context);
     }
     return 'Unknown error';
   }
 }
 
 /// Extension on [LocalException] to provide a user-friendly error message.
-extension _LocalErrorExtension on LocalException {
+extension LocalErrorMessageExtension on LocalException {
   /// Returns a localized error message for a [LocalException].
   String localErrorMessage(BuildContext context) {
     return switch (type) {

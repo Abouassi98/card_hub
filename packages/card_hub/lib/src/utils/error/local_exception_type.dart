@@ -1,4 +1,4 @@
-part of 'app_exception.dart';
+/// Defines the types of local exceptions that can occur in the application.
 
 /// Defines the specific type of a [LocalException].
 enum LocalExceptionType {
