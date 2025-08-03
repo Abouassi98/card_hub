@@ -26,6 +26,9 @@ class CardHubComponent extends StatelessWidget {
     this.brandingPalette,
     super.key,
   });
+  // Cached color calculations to avoid recalculating on every build
+  static final Map<List<Color>?, Color> _contentColorCache = {};
+  static final Map<List<Color>?, Gradient?> _gradientCache = {};
 
   /// The data model representing the card to be displayed.
   final CardHubModel card;
@@ -61,36 +64,69 @@ class CardHubComponent extends StatelessWidget {
 
   /// A widget that is displayed on the card when it is not the default card.
   final Widget Function(CardHubModel)? nonDefaultBadge;
+  
+  /// Returns the appropriate content color based on the branding palette
+  /// Uses a static cache to avoid recalculating for the same palette
+  Color _getContentColor() {
+    // Default content color is white
+    if (brandingPalette == null || brandingPalette!.isEmpty) {
+      return Colors.white;
+    }
+    
+    // Check if we have this color cached
+    if (_contentColorCache.containsKey(brandingPalette)) {
+      return _contentColorCache[brandingPalette]!;
+    }
+    
+    // Calculate the content color based on brightness
+    final brightness = ThemeData.estimateBrightnessForColor(brandingPalette![0]);
+    final contentColor = brightness == Brightness.dark ? Colors.white : Colors.black87;
+    
+    // Cache the result
+    _contentColorCache[brandingPalette] = contentColor;
+    
+    return contentColor;
+  }
+  
+  /// Returns the appropriate background gradient based on the branding palette
+  /// Uses a static cache to avoid recalculating for the same palette
+  Gradient? _getBackgroundGradient() {
+    // Check if we have this gradient cached
+    if (_gradientCache.containsKey(brandingPalette)) {
+      return _gradientCache[brandingPalette];
+    }
+    
+    // Calculate the gradient
+    Gradient? backgroundGradient;
+    if (brandingPalette != null && brandingPalette!.length > 1) {
+      backgroundGradient = LinearGradient(
+        colors: brandingPalette!,
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+    }
+    
+    // Cache the result
+    _gradientCache[brandingPalette] = backgroundGradient;
+    
+    return backgroundGradient;
+  }
 
   /// Builds the widget tree for this component.
   @override
   Widget build(BuildContext context) {
+    // Memoize these calculations to avoid recalculating on every build
     // Determine the color of text and icons based on the background
-    Color contentColor = Colors.white; // Default content color
-    Gradient? backgroundGradient;
-    // Determine background and content color from the palette
-    if (brandingPalette != null && brandingPalette!.isNotEmpty) {
-      // Use the first color in the palette to determine text/icon contrast
-      final brightness =
-          ThemeData.estimateBrightnessForColor(brandingPalette![0]);
-      contentColor =
-          brightness == Brightness.dark ? Colors.white : Colors.black87;
-
-      if (brandingPalette!.length > 1) {
-        // Create a gradient from the palette
-        backgroundGradient = LinearGradient(
-          colors: brandingPalette!,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        );
-      }
-    }
+    final Color contentColor = _getContentColor();
+    final Gradient? backgroundGradient = _getBackgroundGradient();
 
     final TextStyle brandedTextStyle =
         TextStyles.defaultCreditCardStyle(context)
             .copyWith(color: contentColor);
 
-    return Stack(
+    // Wrap with RepaintBoundary to optimize rendering performance
+    return RepaintBoundary(
+      child: Stack(
       children: [
         Container(
           decoration: card.logoAssetPath != null
@@ -164,6 +200,7 @@ class CardHubComponent extends StatelessWidget {
         if (!isDefault && !isSelected && nonDefaultBadge != null)
           nonDefaultBadge!(card),
       ],
+    ),
     );
   }
 }

@@ -4,14 +4,17 @@ import 'package:flutter/services.dart';
 
 import '../models/card_hub_model.dart';
 import '../utils/color_extractor.dart';
+import '../utils/material_color_extractor.dart';
 import '../utils/shared_preferences_facade.dart';
 
 /// A service class that handles all business logic for CardHub
 /// This approach separates business logic from UI without using state management
 class CardHubService {
-
   /// Private constructor to prevent instantiation
   CardHubService._();
+  
+  /// Cache for storing extracted color palettes to avoid repeated processing
+  static final Map<String, List<Color>> _colorPaletteCache = {};
   /// The key for storing the default card ID in SharedPreferences
   static const String defaultCardIdKey = 'default_card_id';
 
@@ -60,12 +63,73 @@ class CardHubService {
         continue;
       }
       
+      // Check if we already have this palette cached
+      if (_colorPaletteCache.containsKey(path)) {
+        palettes[path] = _colorPaletteCache[path]!;
+        continue;
+      }
+      
       try {
         final byteData = await rootBundle.load(path);
-        final palette = await compute(decodeAndExtractCleanPalette, byteData);
-        palettes[path] = palette;
+        
+        // Use the new Material 3 color extraction for premium branding
+        try {
+          // First try the new Material 3 color extraction
+          final colorScheme = await MaterialColorExtractor.extractCachedColorScheme(
+            byteData, 
+            path,
+          );
+          
+          // Create a palette from the color scheme's primary colors
+          final palette = [
+            colorScheme.primary,
+            colorScheme.secondary,
+            colorScheme.tertiary,
+          ];
+          
+          palettes[path] = palette;
+          
+          // Cache the result for future use
+          _colorPaletteCache[path] = palette;
+        } catch (materialError) {
+          debugPrint('Material 3 extraction failed, falling back to legacy: $materialError');
+          
+          // Fallback to legacy extraction if Material 3 fails
+          final colorScheme = await ColorExtractor.extractCleanPalette(byteData);
+          
+          // Create a palette from the legacy extraction
+          // Ensure we have at least 3 colors by duplicating the last one if needed
+          final List<Color> extendedPalette = List.from(colorScheme);
+          while (extendedPalette.length < 3) {
+            if (extendedPalette.isEmpty) {
+              extendedPalette.add(Colors.blue);
+            } else {
+              extendedPalette.add(extendedPalette.last);
+            }
+          }
+          
+          final palette = [
+            extendedPalette[0],
+            extendedPalette[1],
+            extendedPalette[2],
+          ];
+          
+          palettes[path] = palette;
+          
+          // Cache the result for future use
+          _colorPaletteCache[path] = palette;
+        }
       } catch (e) {
         debugPrint('Could not process logo $path: $e');
+        // Fallback to legacy extraction method if Material 3 extraction fails
+        try {
+          final byteData = await rootBundle.load(path);
+          final palette = await compute(decodeAndExtractCleanPalette, byteData);
+          palettes[path] = palette;
+          _colorPaletteCache[path] = palette;
+        } catch (e) {
+          debugPrint('Legacy extraction also failed for $path: $e');
+        }
       }
     }
 

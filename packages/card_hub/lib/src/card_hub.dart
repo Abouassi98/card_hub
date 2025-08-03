@@ -53,13 +53,17 @@ class CardHub extends StatefulWidget {
   State<CardHub> createState() => _CardHubState();
 }
 
-class _CardHubState extends State<CardHub> {
-  // State variables - minimized for better performance
-  List<CardHubModel> _displayItems = [];
+class _CardHubState extends State<CardHub> with AutomaticKeepAliveClientMixin {
+  // State variables - optimized for better performance
+  late List<CardHubModel> _displayItems;
   String? _defaultCardId;
-  Map<String, List<Color>> _brandingPalettes = {};
+  late Map<String, List<Color>> _brandingPalettes;
   bool _isLoading = true;
   int? _selectedCardIndex;
+  
+  // Keep widget alive when it's not visible to preserve state and avoid rebuilds
+  @override
+  bool get wantKeepAlive => true;
   
   @override
   void initState() {
@@ -84,10 +88,13 @@ class _CardHubState extends State<CardHub> {
     }
   }
   
-  /// Initializes the widget with data
+  /// Initializes the widget with data using optimized lazy loading approach
   Future<void> _initialize() async {
     setState(() {
       _isLoading = true;
+      // Initialize collections to prevent null errors
+      _displayItems = [];
+      _brandingPalettes = {};
     });
 
     // 1. Fetch the default card ID from the service
@@ -105,19 +112,33 @@ class _CardHubState extends State<CardHub> {
       savedDefaultId
     );
     
-    // 4. Extract color palettes in parallel
-    final palettes = await CardHubService.extractColorPalettes(widget.items);
-    
-    // 5. Update state with all processed data at once (reduces rebuilds)
+    // 4. First update state with basic data to show UI faster
     setState(() {
       _displayItems = reorderedItems;
       _defaultCardId = savedDefaultId;
       _selectedCardIndex = selectedIndex;
-      _brandingPalettes = palettes;
       _isLoading = false;
     });
+    
+    // 5. Then lazily load color palettes in the background
+    // This allows the UI to be interactive while palettes are loading
+    await _loadColorPalettes();
   }
   
+  /// Lazily loads color palettes in the background
+  /// This improves initial load time and reduces memory pressure
+  Future<void> _loadColorPalettes() async {
+    // Extract color palettes in parallel
+    final palettes = await CardHubService.extractColorPalettes(widget.items);
+    
+    // Only update state if widget is still mounted
+    if (mounted) {
+      setState(() {
+        _brandingPalettes = palettes;
+      });
+    }
+  }
+
   /// Sets a card as the default
   Future<void> _setDefaultCard(String cardId, int index) async {
     // 1. Save to service
@@ -132,6 +153,7 @@ class _CardHubState extends State<CardHub> {
   
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required by AutomaticKeepAliveClientMixin
     // Direct state-based rendering for better performance
     if (_isLoading) {
       return widget.loadingWidget ?? const Center(child: CircularProgressIndicator());

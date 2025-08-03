@@ -22,6 +22,9 @@ dependencies:
   # StateManagement & DI
   shared_preferences: ^2.5.3
 
+  # Material Design
+  material_color_utilities: ^0.11.0
+
  
 
 
