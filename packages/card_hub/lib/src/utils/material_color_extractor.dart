@@ -139,7 +139,7 @@ class MaterialColorExtractor {
     // Create inverse colors
     final inverseSurface = isDark ? Colors.grey.shade50 : Colors.grey.shade900;
     final onInverseSurface = isDark ? Colors.black : Colors.white;
-    final inversePrimary = isDark ? primary.withValues(alpha: 0.8) : primary.withValues(alpha: 0.6);
+    final inversePrimary = isDark ? primary.withAlpha(128) : primary.withAlpha(192);
     
     return ColorScheme(
       brightness: isDark ? Brightness.dark : Brightness.light,
@@ -185,7 +185,7 @@ class MaterialColorExtractor {
   static Color _contrastingColor(Color color) {
     // Calculate perceived brightness using the formula
     // (299*R + 587*G + 114*B) / 1000
-    final brightness = (299 * (color.r * 255.0).round() & 0xff + 587 * (color.g * 255.0).round() & 0xff + 114 * (color.b * 255.0).round() & 0xff) / 1000;
+    final brightness = (299 * (color.red * 255.0).round() & 0xff + 587 * (color.green * 255.0).round() & 0xff + 114 * (color.blue * 255.0).round() & 0xff) / 1000;
     
     // Return white for dark colors, black for light colors
     return brightness < 128 ? Colors.white : Colors.black;
