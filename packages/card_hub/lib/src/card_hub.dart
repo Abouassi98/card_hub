@@ -60,17 +60,17 @@ class _CardHubState extends State<CardHub> with AutomaticKeepAliveClientMixin {
   late Map<String, List<Color>> _brandingPalettes;
   bool _isLoading = true;
   int? _selectedCardIndex;
-  
+
   // Keep widget alive when it's not visible to preserve state and avoid rebuilds
   @override
   bool get wantKeepAlive => true;
-  
+
   @override
   void initState() {
     super.initState();
     _initialize();
   }
-  
+
   @override
   void didUpdateWidget(CardHub oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -78,7 +78,7 @@ class _CardHubState extends State<CardHub> with AutomaticKeepAliveClientMixin {
       _initialize();
     }
   }
-  
+
   /// Clears the selected card
   void _unselectCard() {
     if (_selectedCardIndex != null) {
@@ -87,7 +87,7 @@ class _CardHubState extends State<CardHub> with AutomaticKeepAliveClientMixin {
       });
     }
   }
-  
+
   /// Initializes the widget with data using optimized lazy loading approach
   Future<void> _initialize() async {
     setState(() {
@@ -97,21 +97,21 @@ class _CardHubState extends State<CardHub> with AutomaticKeepAliveClientMixin {
       _brandingPalettes = {};
     });
 
+    if (widget.items.any((item) => item.isDefault)) {
+      _defaultCardId = widget.items.firstWhere((item) => item.isDefault).id;
+      await CardHubService.saveDefaultCardId(_defaultCardId!);
+    }
+
     // 1. Fetch the default card ID from the service
-    final savedDefaultId = await CardHubService.getDefaultCardId();
-    
+    final savedDefaultId =
+        _defaultCardId ?? await CardHubService.getDefaultCardId();
+
     // 2. Reorder the items based on default card ID
-    final reorderedItems = CardHubService.reorderCardsByDefaultId(
-      widget.items, 
-      savedDefaultId
-    );
-    
+    final reorderedItems =
+        CardHubService.reorderCardsByDefaultId(widget.items, savedDefaultId);
     // 3. Find the selected card index
-    final selectedIndex = CardHubService.findDefaultCardIndex(
-      widget.items, 
-      savedDefaultId
-    );
-    
+    final selectedIndex =
+        CardHubService.findDefaultCardIndex(reorderedItems, savedDefaultId);
     // 4. First update state with basic data to show UI faster
     setState(() {
       _displayItems = reorderedItems;
@@ -119,18 +119,18 @@ class _CardHubState extends State<CardHub> with AutomaticKeepAliveClientMixin {
       _selectedCardIndex = selectedIndex;
       _isLoading = false;
     });
-    
+
     // 5. Then lazily load color palettes in the background
     // This allows the UI to be interactive while palettes are loading
     await _loadColorPalettes();
   }
-  
+
   /// Lazily loads color palettes in the background
   /// This improves initial load time and reduces memory pressure
   Future<void> _loadColorPalettes() async {
     // Extract color palettes in parallel
     final palettes = await CardHubService.extractColorPalettes(widget.items);
-    
+
     // Only update state if widget is still mounted
     if (mounted) {
       setState(() {
@@ -150,13 +150,14 @@ class _CardHubState extends State<CardHub> with AutomaticKeepAliveClientMixin {
       _selectedCardIndex = index;
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required by AutomaticKeepAliveClientMixin
     // Direct state-based rendering for better performance
     if (_isLoading) {
-      return widget.loadingWidget ?? const Center(child: CircularProgressIndicator());
+      return widget.loadingWidget ??
+          const Center(child: CircularProgressIndicator());
     }
 
     return SingleChildScrollView(
@@ -172,7 +173,7 @@ class _CardHubState extends State<CardHub> with AutomaticKeepAliveClientMixin {
             ),
             width: double.infinity,
           ),
-          
+
           // Render each card with animations
           for (int i = 0; i < _displayItems.length; i++)
             AnimatedPositioned(
@@ -212,7 +213,7 @@ class _CardHubState extends State<CardHub> with AutomaticKeepAliveClientMixin {
                 ),
               ),
             ),
-            
+
           // Gesture detector for unselecting cards
           if (_selectedCardIndex != null)
             Positioned.fill(

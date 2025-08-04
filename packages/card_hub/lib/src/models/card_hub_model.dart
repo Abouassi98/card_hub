@@ -7,6 +7,7 @@ import '../utils/enumerations.dart';
 class CardHubModel {
   /// Constructs a [CardHubModel].
   const CardHubModel({
+    this.key,
     required this.id,
     required this.lastFour,
     required this.expirationMonth,
@@ -14,38 +15,56 @@ class CardHubModel {
     required this.cardHolderName,
     required this.type,
     required this.bankName,
+    this.isDefault = false,
     this.logoAssetPath,
     this.cardColor,
     this.onCardTap,
-  }) : assert(!(logoAssetPath != null && cardColor != null), 
+  }) : assert(!(logoAssetPath != null && cardColor != null),
             'Cannot provide both logoAssetPath and cardColor');
+
   /// Constructs a [CardHubModel].
+
+  final Key? key;
+
   /// A unique identifier for the card.
   final String id;
+
   /// A string indicating number on the card.
   final int lastFour;
+
   /// The expiration month of the credit card.
   final int expirationMonth;
+
   /// The expiration year of the credit card.
   final int expirationYear;
+
   /// A string indicating name of the card holder.
   final String cardHolderName;
+
   /// Sets type of the card. An small image is shown based on selected type
   /// of the card at bottom right corner. If this is set to null then image
   /// shown automatically based on credit card number.
   final CardType type;
+
   /// A string indicating name of the bank.
   final String bankName;
+
   /// The local asset path for the card's brand logo (e.g., 'assets/logos/netflix.png').
   /// If provided, the card will be themed based on this logo.
   final String? logoAssetPath;
+
   /// The color of the card. If provided, the card will be themed based on this color.
   final Color? cardColor;
+
   /// Optional callback function that is triggered when a card is selected.
   final void Function(CardHubModel model)? onCardTap;
-            
+
+  /// A boolean that indicates whether the card is the default card.
+  final bool isDefault;
+
   /// Creates a copy of this [CardHubModel] with the given fields replaced with new values.
   CardHubModel copyWith({
+    Key? key,
     String? id,
     int? lastFour,
     int? expirationMonth,
@@ -55,9 +74,11 @@ class CardHubModel {
     String? bankName,
     String? logoAssetPath,
     Color? cardColor,
+    bool? isDefault,
     void Function(CardHubModel)? onCardTap,
   }) {
     return CardHubModel(
+      key: key ?? this.key,
       id: id ?? this.id,
       lastFour: lastFour ?? this.lastFour,
       expirationMonth: expirationMonth ?? this.expirationMonth,
@@ -65,18 +86,20 @@ class CardHubModel {
       cardHolderName: cardHolderName ?? this.cardHolderName,
       type: type ?? this.type,
       bankName: bankName ?? this.bankName,
+      isDefault: isDefault ?? this.isDefault,
       logoAssetPath: logoAssetPath ?? this.logoAssetPath,
       cardColor: cardColor ?? this.cardColor,
       onCardTap: onCardTap ?? this.onCardTap,
     );
   }
-  
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     return other is CardHubModel &&
+        other.key == key &&
         other.id == id &&
         other.lastFour == lastFour &&
         other.expirationMonth == expirationMonth &&
@@ -85,12 +108,14 @@ class CardHubModel {
         other.type == type &&
         other.bankName == bankName &&
         other.logoAssetPath == logoAssetPath &&
+        other.isDefault == isDefault &&
         other.cardColor == cardColor;
   }
 
   @override
   int get hashCode {
     return Object.hash(
+      key,
       id,
       lastFour,
       expirationMonth,
@@ -99,15 +124,16 @@ class CardHubModel {
       type,
       bankName,
       logoAssetPath,
+      isDefault,
       cardColor,
     );
   }
-  
+
   @override
   String toString() {
     return 'CardHubModel(id: $id, lastFour: $lastFour, expirationMonth: $expirationMonth, '
         'expirationYear: $expirationYear, cardHolderName: $cardHolderName, '
         'type: $type, bankName: $bankName, logoAssetPath: $logoAssetPath, '
-        'cardColor: $cardColor)'; 
+        'isDefault: $isDefault, cardColor: $cardColor)';
   }
 }
