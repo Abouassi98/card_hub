@@ -12,6 +12,19 @@ All notable changes to the Card Hub package will be documented in this file.
 
 ### Fixed
 -
+## 0.4.0 - 2025-08-09
+
+### Changed
+- Bumped package version to 0.4.0 in `pubspec.yaml`.
+- README install snippet updated to `card_hub: ^0.4.0`.
+- Minor documentation cleanups in `lib/card_hub.dart` public exports and header.
+
+### Added
+- None.
+
+### Fixed
+- None.
+
 ## 0.3.0 - 2025-08-09
 
 ### Added
