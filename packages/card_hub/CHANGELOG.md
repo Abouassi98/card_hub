@@ -5,6 +5,17 @@ All notable changes to the Card Hub package will be documented in this file.
 ## Unreleased
 
 ### Added
+-
+
+### Changed
+-
+
+### Fixed
+-
+
+## 0.2.0 - 2025-08-08
+
+### Added
 - Premium branding with Material 3 theming via `CardHubThemeProvider`
 - Dynamic `ColorScheme` extraction from card logos using `MaterialColorExtractor`
 - In-memory caching for extracted color schemes and palettes
@@ -29,3 +40,4 @@ All notable changes to the Card Hub package will be documented in this file.
 - Custom badges for default/non-default cards
 - Customizable text styles and layouts
 - Card removal functionality
+
