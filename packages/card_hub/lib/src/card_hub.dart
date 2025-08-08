@@ -1,15 +1,12 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'card_hub_style_data.dart';
 import 'models/card_hub_model.dart';
 import 'presentation/components/card_hub_component.dart';
 import 'presentation/helpers/card_hub_layout_helper.dart';
+import 'services/card_hub_service.dart';
 import 'utils/card_configs.dart';
-import 'utils/color_extractor.dart';
 import 'utils/enumerations.dart';
-import 'utils/shared_preferences_facade.dart';
 
 /// A widget that displays a collection of cards with motion effects, offering a
 /// visually engaging way to present a list of [CardHubModel] items.
@@ -56,28 +53,24 @@ class CardHub extends StatefulWidget {
   State<CardHub> createState() => _CardHubState();
 }
 
-class _CardHubState extends State<CardHub> {
-  // ValueNotifier for selected card index
-  late final ValueNotifier<int?> selectedCardIndexNotifier;
-  
-  // State variables
-  String? defaultCardId;
-  Map<String, List<Color>> brandingPalettes = {};
-  bool isLoading = true;
-  
+class _CardHubState extends State<CardHub> with AutomaticKeepAliveClientMixin {
+  // State variables - optimized for better performance
+  late List<CardHubModel> _displayItems;
+  String? _defaultCardId;
+  late Map<String, List<Color>> _brandingPalettes;
+  bool _isLoading = true;
+  int? _selectedCardIndex;
+
+  // Keep widget alive when it's not visible to preserve state and avoid rebuilds
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
-    selectedCardIndexNotifier = ValueNotifier<int?>(null);
     _initialize();
   }
-  
-  @override
-  void dispose() {
-    selectedCardIndexNotifier.dispose();
-    super.dispose();
-  }
-  
+
   @override
   void didUpdateWidget(CardHub oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -85,164 +78,149 @@ class _CardHubState extends State<CardHub> {
       _initialize();
     }
   }
-  
-  void unSelectCard() {
-    selectedCardIndexNotifier.value = null;
+
+  /// Clears the selected card
+  void _unselectCard() {
+    if (_selectedCardIndex != null) {
+      setState(() {
+        _selectedCardIndex = null;
+      });
+    }
   }
-  
+
+  /// Initializes the widget with data using optimized lazy loading approach
   Future<void> _initialize() async {
+    // If any item is marked default, persist it first
+    if (widget.items.any((item) => item.isDefault)) {
+      _defaultCardId = widget.items.firstWhere((item) => item.isDefault).id;
+      await CardHubService.saveDefaultCardId(_defaultCardId!);
+    }
+
+    // 1) Resolve default ID, 2) reorder items, 3) compute selected index
+    final savedDefaultId = _defaultCardId ?? await CardHubService.getDefaultCardId();
+    final reorderedItems = CardHubService.reorderCardsByDefaultId(widget.items, savedDefaultId);
+    final selectedIndex = CardHubService.findDefaultCardIndex(reorderedItems, savedDefaultId);
+
+    // Single, batched state update to avoid multiple rebuilds
     setState(() {
-      isLoading = true;
+      _displayItems = reorderedItems;
+      _defaultCardId = savedDefaultId;
+      _selectedCardIndex = selectedIndex;
+      _isLoading = false;
+      // Reset palettes; they will be filled asynchronously
+      _brandingPalettes = {};
     });
 
-    // 1. Fetch the default card ID from local storage
-    final savedDefaultId = (await SharedPreferencesFacade.instance)
-        .restoreData<String>(SharedPreferencesFacade.defaultCardIdKey);
-    
-    // Update state with the default card ID
-    setState(() {
-      defaultCardId = savedDefaultId;
-    });
-    
-    selectedCardIndexNotifier.value =
-        widget.items.indexWhere((item) => item.id == savedDefaultId);
-        
-    // 2. Reorder the initial list based on the default card ID
-    final List<CardHubModel> sortedList = List.from(widget.items);
-    if (savedDefaultId != null) {
-      final int defaultIndex =
-          sortedList.indexWhere((item) => item.id == savedDefaultId);
-      if (defaultIndex != -1) {
-        final defaultItem = sortedList.removeAt(defaultIndex);
-        sortedList.insert(0, defaultItem);
+    // Lazily load palettes in background
+    await _loadColorPalettes();
+  }
+
+  /// Lazily loads color palettes in the background
+  /// This improves initial load time and reduces memory pressure
+  Future<void> _loadColorPalettes() async {
+    // Extract color palettes in parallel
+    final palettes = await CardHubService.extractColorPalettes(widget.items);
+
+    // Only update state if widget is still mounted
+    if (mounted) {
+      // Only trigger rebuild if palettes actually changed
+      if (!CardHubService.palettesEqual(_brandingPalettes, palettes)) {
+        setState(() {
+          _brandingPalettes = palettes;
+        });
       }
-    } else {
-      unSelectCard();
-    }
-    
-    if (sortedList.every(
-        (item) => item.logoAssetPath != null)) {
-
-          
-      // 3. Generate color palettes
-      final uniqueLogoPaths =
-          widget.items.map((item) => item.logoAssetPath).toSet();
-      final processingFutures = uniqueLogoPaths.map((path) async {
-        try {
-          final byteData = await rootBundle.load(path!);
-          final palette =
-              await compute(decodeAndExtractCleanPalette, byteData);
-          return MapEntry(path, palette);
-        } catch (e) {
-          debugPrint('Could not process logo $path: $e');
-          return null;
-        }
-      }).toList();
-
-      final results = await Future.wait(processingFutures);
-      final newPalettes = Map.fromEntries(
-          results.whereType<MapEntry<String, List<Color>>>());
-          
-      setState(() {
-        brandingPalettes = newPalettes;
-        isLoading = false;
-      });
-    } else {
-      setState(() {
-        isLoading = false;
-      });
     }
   }
-  
-  // Function to set a card as default
-  Future<void> setDefaultCard(String cardId) async {
-    // 1. Save to local storage
-    await (await SharedPreferencesFacade.instance).saveData(
-      key: SharedPreferencesFacade.defaultCardIdKey,
-      value: cardId,
-    );
 
-    // 2. Update the state to reflect the change immediately
+  /// Sets a card as the default
+  Future<void> _setDefaultCard(String cardId, int index) async {
+    // 1. Save to service
+    await CardHubService.saveDefaultCardId(cardId);
+
+    // 2. Update state
     setState(() {
-      defaultCardId = cardId;
+      _defaultCardId = cardId;
+      _selectedCardIndex = index;
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
-    // Use a ValueListenableBuilder to listen for changes to the selected card index
-    return ValueListenableBuilder<int?>(  
-      valueListenable: selectedCardIndexNotifier,
-      builder: (context, selectedCardIndex, _) {
-
-        if (isLoading) {
-          return widget.loadingWidget ?? const Center(child: CircularProgressIndicator());
+    super.build(context); // Required by AutomaticKeepAliveClientMixin
+    // Direct state-based rendering for better performance
+    if (_isLoading) {
+      return widget.loadingWidget ?? const Center(child: CircularProgressIndicator());
     }
 
-        return SingleChildScrollView(
-          child: Stack(
+    // Fast-path: render nothing for empty lists to avoid building animated stack
+    if (_displayItems.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return SingleChildScrollView(
+      child: Stack(
         alignment: Alignment.center,
         children: [
+          // Container for proper height calculation
           AnimatedContainer(
             duration: CardConfigs.kAnimationDuration,
             height: CardHubLayoutHelper.totalCardsHeight(
-              selectedCardIndex: selectedCardIndex,
-              totalCard: widget.items.length,
+              selectedCardIndex: _selectedCardIndex,
+              totalCard: _displayItems.length,
             ),
             width: double.infinity,
           ),
-          for (int i = 0; i < widget.items.length; i++)
+
+          // Render each card with animations
+          for (int i = 0; i < _displayItems.length; i++)
             AnimatedPositioned(
               top: CardHubLayoutHelper.cardPositioned(
-                selectedCardIndex: selectedCardIndex,
+                selectedCardIndex: _selectedCardIndex,
                 index: i,
-                isSelected: i == selectedCardIndex,
+                isSelected: i == _selectedCardIndex,
               ),
               duration: CardConfigs.kAnimationDuration,
               child: AnimatedScale(
                 scale: CardHubLayoutHelper.unSelectedCardsScale(
-                  selectedCardIndex: selectedCardIndex,
+                  selectedCardIndex: _selectedCardIndex,
                   index: i,
-                  length: widget.items.length,
-                  isSelected: i == selectedCardIndex,
+                  length: _displayItems.length,
+                  isSelected: i == _selectedCardIndex,
                 ),
                 duration: CardConfigs.kAnimationDuration,
                 child: GestureDetector(
                   onTap: () {
-                    setDefaultCard(widget.items[i].id);
-                    selectedCardIndexNotifier.value = i;
-                    widget.items[i].onCardTap?.call(widget.items[i]);
+                    _setDefaultCard(_displayItems[i].id, i);
+                    _displayItems[i].onCardTap?.call(_displayItems[i]);
                   },
                   child: CardHubComponent(
+                    key: ValueKey<String>(_displayItems[i].id),
                     defaultBadge: widget.defaultBadge,
                     nonDefaultBadge: widget.nonDefaultBadge,
-                    isSelected: i == selectedCardIndex,
-                    // --- PASS UPDATED PROPS ---
-                    isDefault: widget.items[i].id == defaultCardId,
+                    isSelected: i == _selectedCardIndex,
+                    isDefault: _displayItems[i].id == _defaultCardId,
                     onRemoveCard: widget.onRemoveCard,
-
-                    card: widget.items[i],
-                    brandingPalette:
-                        brandingPalettes[widget.items[i].logoAssetPath],
+                    card: _displayItems[i],
+                    brandingPalette: _brandingPalettes[_displayItems[i].logoAssetPath],
                     visaMasterCardType: CardType.values.firstWhere(
-                      (element) => element.name == widget.items[i].type.name,
+                      (element) => element.name == _displayItems[i].type.name,
+                      orElse: () => CardType.visa,
                     ),
                   ),
                 ),
               ),
             ),
-          if (selectedCardIndex != null)
+
+          // Gesture detector for unselecting cards
+          if (_selectedCardIndex != null)
             Positioned.fill(
               child: GestureDetector(
-                onVerticalDragEnd: (_) => unSelectCard(),
-                onVerticalDragStart: (_) => unSelectCard(),
+                onVerticalDragEnd: (_) => _unselectCard(),
+                onVerticalDragStart: (_) => _unselectCard(),
               ),
             ),
         ],
       ),
-        );
-      },
     );
-  
   }
 }

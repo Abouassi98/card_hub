@@ -2,6 +2,21 @@
 
 All notable changes to the Card Hub package will be documented in this file.
 
+## Unreleased
+
+### Added
+- Premium branding with Material 3 theming via `CardHubThemeProvider`
+- Dynamic `ColorScheme` extraction from card logos using `MaterialColorExtractor`
+- In-memory caching for extracted color schemes and palettes
+- Performance guidance at `lib/src/docs/performance_best_practices.md`
+
+### Changed
+- README updated with premium branding usage example and notes
+- Clarified persistence via `SharedPreferencesFacade` and `CardHubService`
+
+### Fixed
+- README example corrected to use `CardHubModel.onCardTap` instead of a non-existent `onCardSelected`
+
 ## 0.1.0 - 2025-08-01
 
 ### Added

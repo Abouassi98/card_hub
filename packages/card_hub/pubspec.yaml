@@ -1,7 +1,6 @@
 name: card_hub
 description: A Flutter package for animated credit/debit card displays in payment apps and digital wallets.
-version: 0.1.0
-homepage: https://github.com/Abouassi98/card_hub
+version: 0.2.0
 repository: https://github.com/Abouassi98/card_hub
 issue_tracker: https://github.com/Abouassi98/card_hub/issues
 
@@ -16,11 +15,14 @@ dependencies:
 
 
   # Images
-  flutter_svg: ^2.2.0
+  flutter_svg: ^2.1.0
   image: ^4.5.4
 
   # StateManagement & DI
   shared_preferences: ^2.5.3
+
+  # Material Design
+  material_color_utilities: ^0.11.0
 
  
 

@@ -26,6 +26,9 @@ class CardHubComponent extends StatelessWidget {
     this.brandingPalette,
     super.key,
   });
+  // Cached color calculations to avoid recalculating on every build
+  static final Map<List<Color>?, Color> _contentColorCache = {};
+  static final Map<List<Color>?, Gradient?> _gradientCache = {};
 
   /// The data model representing the card to be displayed.
   final CardHubModel card;
@@ -62,108 +65,140 @@ class CardHubComponent extends StatelessWidget {
   /// A widget that is displayed on the card when it is not the default card.
   final Widget Function(CardHubModel)? nonDefaultBadge;
 
+  /// Returns the appropriate content color based on the branding palette
+  /// Uses a static cache to avoid recalculating for the same palette
+  Color _getContentColor() {
+    // Default content color is white
+    if (brandingPalette == null || brandingPalette!.isEmpty) {
+      return Colors.white;
+    }
+
+    // Check if we have this color cached
+    if (_contentColorCache.containsKey(brandingPalette)) {
+      return _contentColorCache[brandingPalette]!;
+    }
+
+    // Calculate the content color based on brightness
+    final brightness = ThemeData.estimateBrightnessForColor(brandingPalette![0]);
+    final contentColor = brightness == Brightness.dark ? Colors.white : Colors.black87;
+
+    // Cache the result
+    _contentColorCache[brandingPalette] = contentColor;
+
+    return contentColor;
+  }
+
+  /// Returns the appropriate background gradient based on the branding palette
+  /// Uses a static cache to avoid recalculating for the same palette
+  Gradient? _getBackgroundGradient() {
+    // Check if we have this gradient cached
+    if (_gradientCache.containsKey(brandingPalette)) {
+      return _gradientCache[brandingPalette];
+    }
+
+    // Calculate the gradient
+    Gradient? backgroundGradient;
+    if (brandingPalette != null && brandingPalette!.length > 1) {
+      backgroundGradient = LinearGradient(
+        colors: brandingPalette!,
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+    }
+
+    // Cache the result
+    _gradientCache[brandingPalette] = backgroundGradient;
+
+    return backgroundGradient;
+  }
+
   /// Builds the widget tree for this component.
   @override
   Widget build(BuildContext context) {
+    // Memoize these calculations to avoid recalculating on every build
     // Determine the color of text and icons based on the background
-    Color contentColor = Colors.white; // Default content color
-    Gradient? backgroundGradient;
-    // Determine background and content color from the palette
-    if (brandingPalette != null && brandingPalette!.isNotEmpty) {
-      // Use the first color in the palette to determine text/icon contrast
-      final brightness =
-          ThemeData.estimateBrightnessForColor(brandingPalette![0]);
-      contentColor =
-          brightness == Brightness.dark ? Colors.white : Colors.black87;
-
-      if (brandingPalette!.length > 1) {
-        // Create a gradient from the palette
-        backgroundGradient = LinearGradient(
-          colors: brandingPalette!,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        );
-      }
-    }
+    final Color contentColor = _getContentColor();
+    final Gradient? backgroundGradient = _getBackgroundGradient();
 
     final TextStyle brandedTextStyle =
-        TextStyles.defaultCreditCardStyle(context)
-            .copyWith(color: contentColor);
+        TextStyles.defaultCreditCardStyle(context).copyWith(color: contentColor);
 
-    return Stack(
-      children: [
-        Container(
-          decoration: card.logoAssetPath != null
-              ? BoxDecoration(
-                  // If a brandingScheme exists, use it. Otherwise, fall back to the gradient.
-                  // Use solid color if only one color in palette, otherwise use the new gradient
-                  color: (brandingPalette?.length == 1)
-                      ? brandingPalette![0]
-                      : null,
-                  gradient: backgroundGradient ??
-                      cardHubStyleData?.gradient ??
-                      visaMasterCardType.gradient,
-                  borderRadius: const BorderRadius.all(Radius.circular(15)),
-                  image: DecorationImage(
-                    image: AssetImage(card.logoAssetPath!),
-                    fit: BoxFit.fill,
-                    filterQuality: FilterQuality.high,
-                    opacity: 0.2,
-                  ))
-              : BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(15)),
-                  color: card.cardColor,
+    // Wrap with RepaintBoundary to optimize rendering performance
+    return RepaintBoundary(
+      child: Stack(
+        children: [
+          Container(
+            decoration: card.logoAssetPath != null
+                ? BoxDecoration(
+                    // If a brandingScheme exists, use it. Otherwise, fall back to the gradient.
+                    // Use solid color if only one color in palette, otherwise use the new gradient
+                    color: (brandingPalette?.length == 1) ? brandingPalette![0] : null,
+                    gradient: backgroundGradient ??
+                        cardHubStyleData?.gradient ??
+                        visaMasterCardType.gradient,
+                    borderRadius: const BorderRadius.all(Radius.circular(15)),
+                    image: DecorationImage(
+                      // Downscale decode size for watermark to lower GPU texture size
+                      image: ResizeImage(
+                        AssetImage(card.logoAssetPath!),
+                        width: 256, // reasonable decode width for subtle background
+                      ),
+                      fit: BoxFit.fill,
+                      opacity: 0.2,
+                    ))
+                : BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(15)),
+                    color: card.cardColor,
+                  ),
+            width: cardHubStyleData?.width ?? MediaQuery.sizeOf(context).width * 0.8,
+            margin: const EdgeInsets.symmetric(
+              horizontal: Sizes.paddingH20,
+            ).copyWith(top: Sizes.paddingV10),
+            padding:
+                cardHubStyleData?.padding ?? const EdgeInsets.only(left: 16, right: 16, bottom: 22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                CardHubLogo(
+                  image: cardHubStyleData?.logoImage ?? visaMasterCardType.image,
                 ),
-          width:
-              cardHubStyleData?.width ?? MediaQuery.sizeOf(context).width * 0.8,
-          margin: const EdgeInsets.symmetric(
-            horizontal: Sizes.paddingH20,
-          ).copyWith(top: Sizes.paddingV10),
-          padding: cardHubStyleData?.padding ??
-              const EdgeInsets.only(left: 16, right: 16, bottom: 22),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              CardHubLogo(
-                image: cardHubStyleData?.logoImage ?? visaMasterCardType.image,
-              ),
-              const SizedBox(height: Sizes.marginV16),
-              Text(card.bankName, style: brandedTextStyle),
-              const SizedBox(height: Sizes.marginV16),
-              Text(
-                '${AppConstants.twelveX} ${card.lastFour}',
-                textAlign: TextAlign.left,
-                style: cardHubStyleData?.textStyle ?? brandedTextStyle,
-              ),
-              const SizedBox(height: Sizes.marginV10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  CardHubDetails(
-                    label: cardHubStyleData?.labelCardHolder ?? 'CARDHOLDER',
-                    value: card.cardHolderName,
-                    textStyle: cardHubStyleData?.textStyle,
-                    overrideColor: contentColor, // Pass color down
-                  ),
-                  CardHubDetails(
-                    label: cardHubStyleData?.labelValidThru ?? 'VALID THRU',
-                    value: '${card.expirationMonth} / ${card.expirationYear}',
-                    textStyle: cardHubStyleData?.textStyle,
-                    overrideColor: contentColor, // Pass color down
-                  ),
-                ],
-              ),
-            ],
+                const SizedBox(height: Sizes.marginV16),
+                Text(card.bankName, style: brandedTextStyle),
+                const SizedBox(height: Sizes.marginV16),
+                Text(
+                  '${AppConstants.twelveX} ${card.lastFour}',
+                  textAlign: TextAlign.left,
+                  style: cardHubStyleData?.textStyle ?? brandedTextStyle,
+                ),
+                const SizedBox(height: Sizes.marginV10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    CardHubDetails(
+                      label: cardHubStyleData?.labelCardHolder ?? 'CARDHOLDER',
+                      value: card.cardHolderName,
+                      textStyle: cardHubStyleData?.textStyle,
+                      overrideColor: contentColor, // Pass color down
+                    ),
+                    CardHubDetails(
+                      label: cardHubStyleData?.labelValidThru ?? 'VALID THRU',
+                      value: '${card.expirationMonth} / ${card.expirationYear}',
+                      textStyle: cardHubStyleData?.textStyle,
+                      overrideColor: contentColor, // Pass color down
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-        // Show "Set as Default" button only when the card is selected
-        // and it is NOT already the default card.
-        if (isDefault && isSelected && defaultBadge != null) defaultBadge!(card),
-        // Show "Default" chip if it's the default card
-        if (!isDefault && !isSelected && nonDefaultBadge != null)
-          nonDefaultBadge!(card),
-      ],
+          // Show "Set as Default" button only when the card is selected
+          // and it is NOT already the default card.
+          if (isDefault && isSelected && defaultBadge != null) defaultBadge!(card),
+          // Show "Default" chip if it's the default card
+          if (!isDefault && !isSelected && nonDefaultBadge != null) nonDefaultBadge!(card),
+        ],
+      ),
     );
   }
 }

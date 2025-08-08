@@ -21,8 +21,8 @@ abstract class TextStyles {
 
   /// Text style with font size 10.
   static TextStyle f10(BuildContext context) => _mainStyle(
-    context,
-  ).copyWith(color: Colors.grey, fontSize: Sizes.font10, fontWeight: FontWeight.bold);
+        context,
+      ).copyWith(color: Colors.grey, fontSize: Sizes.font10, fontWeight: FontWeight.bold);
 
   /// Returns the default text style for credit card widgets, merging the app's title style with custom color and font size.
   ///

@@ -1,0 +1,9 @@
+tags:
+  perf:
+    timeout: 3x
+  slow:
+    timeout: 5x
+
+# Default platforms for tests in this package
+platforms:
+  - vm
