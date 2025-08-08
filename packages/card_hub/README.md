@@ -5,12 +5,7 @@ A Flutter package that provides a visually engaging and animated way to display 
 Card Hub allows users to select a default card that appears above other cards, with smooth animations during transitions. The package automatically stores the default card ID in local storage for persistence across sessions.
 
 
-<!-- Use HTML for better control -->
-<p align="center">
-  <img src="https://github.com/Abouassi98/card_hub/blob/Dev/packages/card_hub/.github/gifs/card_hub.gif?raw=true" width="600" height="1000" alt="Card Hub Demo">
-</p>
-
-
+![Card Hub Demo](https://raw.githubusercontent.com/Abouassi98/card_hub/Dev/.github/gifs/card_hub_small.gif)
 
 
 ## Features
