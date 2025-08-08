@@ -2,12 +2,16 @@ name: Build
 
 on:
   push:
-    branches: [main , Dev]
+    branches: [main, dev]
     paths-ignore:
       - "**/*.md"
   pull_request:
     paths-ignore:
       - "**/*.md"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -27,6 +31,16 @@ jobs:
         uses: subosito/flutter-action@v2.7.1
         with:
           channel: ${{ matrix.channel }}
+
+      - name: Cache pub and tool directories
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
 
       - name: Set environment paths
         run: |

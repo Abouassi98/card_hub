@@ -2,21 +2,25 @@ version: 2
 enable-beta-ecosystems: true
 
 updates:
-  # GitHub actions
+  # GitHub Actions at repo root
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: weekly
-  # Workspace root
+
+  # Pub at workspace root
   - package-ecosystem: "pub"
     directory: "/"
     schedule:
       interval: weekly
-  # Packages
+
+  # Pub for package: card_hub
   - package-ecosystem: "pub"
     directory: "/packages/card_hub"
     schedule:
       interval: weekly
+
+  # Pub for package: card_hub_test (if present)
   - package-ecosystem: "pub"
     directory: "/packages/card_hub_test"
     schedule:
