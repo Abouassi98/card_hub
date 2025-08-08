@@ -77,5 +77,3 @@ pubspec.lock
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
 
-# don't check in golden failure output
-**/failures/*.png

@@ -1,0 +1,51 @@
+name: Build
+
+on:
+  push:
+    branches: [main , Dev]
+    paths-ignore:
+      - "**/*.md"
+  pull_request:
+    paths-ignore:
+      - "**/*.md"
+
+jobs:
+  build:
+    name: Run flutter test and analyze
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        channel:
+          - stable
+          # We'll add master after migrating to Melos 7.x.x and flutter workspaces
+          # - master
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter environment
+        uses: subosito/flutter-action@v2.7.1
+        with:
+          channel: ${{ matrix.channel }}
+
+      - name: Set environment paths
+        run: |
+          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+          echo "PUB_CACHE="$HOME/.pub-cache"" >> $GITHUB_ENV
+
+      - name: Setup melos
+        run: |
+          dart pub global activate melos
+          melos --version
+          melos bootstrap
+
+      - name: Verify formatting
+        # Remove --line-length=100 when upgrading the min dart sdk to at least 3.7
+        run: melos exec -- dart format --output=none --set-exit-if-changed --line-length=100 .
+
+      # Consider passing '--fatal-infos' for slightly stricter analysis.
+      - name: Run flutter analyze
+        run: melos run analyze
+
+      - name: Run tests
+        run: melos run test
