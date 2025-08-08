@@ -17,12 +17,15 @@ Card Hub allows users to select a default card that appears above other cards, w
 
 - **Animated Card Stack**: Display multiple cards in a visually appealing stack with smooth animations
 - **Default Card Selection**: Allow users to select a default card that appears above others
-- **Persistent Selection**: Automatically store default card selection in local storage
+- **Persistent Selection**: Store default card selection in local storage via `SharedPreferences` (see `SharedPreferencesFacade`)
+- **Premium Branding (Material 3)**:
+  - Dynamic app theming from card logo using `MaterialColorExtractor`
+  - Automatic light/dark `ColorScheme` generation with in-memory caching
+  - `CardHubThemeProvider` exposes `lightTheme`/`darkTheme` and `updateThemeFromCard()`
 - **Dynamic Card Styling**:
-  - Use custom colors for card backgrounds
-  - Extract colors from card logos to create branded card designs
+  - Use custom colors or auto-extracted logo colors for branded designs
   - Support for custom images on cards
-- **Card Types Support**: Built-in support for various card types (Visa, Mastercard, etc.)
+- **Card Types Support**: Built-in support for Visa, Mastercard, AmEx, Discover, etc.
 - **Highly Customizable**:
   - Custom badges for default/non-default cards
   - Customizable text styles and layouts
@@ -34,7 +37,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  card_hub: ^0.2.0
+  card_hub: ^0.1.0
 ```
 
 Then run:
@@ -123,6 +126,74 @@ class CardHubDemo extends StatelessWidget {
 }
 ```
 
+### Dynamic App Theming (Premium Branding)
+
+Use `CardHubThemeProvider` to derive a full Material 3 theme from the selected card's logo and apply it across your app.
+
+```dart
+import 'package:card_hub/card_hub.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final themeProvider = CardHubThemeProvider(useMaterial3: true);
+
+  // Example items; when selection changes, call updateThemeFromCard(selected)
+  final items = <CardHubModel>[
+    CardHubModel(
+      id: '1',
+      lastFour: 1234,
+      expirationMonth: 12,
+      expirationYear: 25,
+      cardHolderName: 'JOHN DOE',
+      type: CardType.visa,
+      bankName: 'EXAMPLE BANK',
+      logoAssetPath: 'assets/images/cards/visa_logo.png',
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize theme from first card (optional)
+    themeProvider.updateThemeFromCard(items.first);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: themeProvider,
+      builder: (context, _) {
+        return MaterialApp(
+          theme: themeProvider.lightTheme,
+          darkTheme: themeProvider.darkTheme,
+          home: Scaffold(
+            appBar: AppBar(title: const Text('Card Hub Theming')),
+            body: CardHub(
+              items: items
+                  .map(
+                    (e) => e.copyWith(
+                      onCardTap: (card) => themeProvider.updateThemeFromCard(card),
+                    ),
+                  )
+                  .toList(),
+              onRemoveCard: () {},
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+```
+
 ### Customization Options
 
 #### Card Hub Style Data
@@ -182,6 +253,13 @@ The package supports the following card types:
 - `CardType.discover`
 - `CardType.elo`
 - `CardType.otherBrand`
+
+## Notes and Best Practices
+
+- **Assets**: If you use `logoAssetPath` in `CardHubModel`, ensure the asset is listed under `flutter/assets` in your app's `pubspec.yaml`.
+- **Persistence**: Default card ID is stored via `SharedPreferences` using `CardHubService.saveDefaultCardId()` and restored by `CardHubService.getDefaultCardId()`.
+- **Performance**: Color extraction uses in-memory caching. See `lib/src/docs/performance_best_practices.md` for guidance.
+- **API Surface**: Public exports include `CardHub`, `CardHubStyleData`, `CardHubModel`, `CardHubThemeProvider`, and utilities under `src/utils/` via `card_hub.dart`.
 
 ## License
 
