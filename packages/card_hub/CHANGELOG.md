@@ -12,6 +12,16 @@ All notable changes to the Card Hub package will be documented in this file.
 
 ### Fixed
 -
+## 0.3.0 - 2025-08-09
+
+### Added
+- `LocalExceptionType` enum to standardize local error handling (`lib/src/utils/error/local_exception_type.dart`).
+- Generated `AssetPaths` utility for image asset constants (`lib/src/utils/asset_paths.dart`).
+- Registered card assets and custom font in `pubspec.yaml` under `flutter/assets` and `flutter/fonts`.
+
+### Changed
+- Clarified public library exports and inline docs in `lib/card_hub.dart`.
+- Consolidated dependency declarations in `pubspec.yaml`.
 
 ## 0.2.0 - 2025-08-08
 
