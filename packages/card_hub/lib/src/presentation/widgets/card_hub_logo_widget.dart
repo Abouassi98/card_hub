@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../utils/asset_paths.dart';
@@ -26,10 +25,12 @@ class CardHubLogo extends StatelessWidget {
           package: AppConstants.packageName,
           height: 20,
           width: 18,
+          // Decode closer to display size to reduce memory/bandwidth
+          cacheWidth: 36, // ~2x width for high-DPI devices
+          filterQuality: FilterQuality.low,
         ),
         Padding(
-          padding: const EdgeInsets.only(
-              top: Sizes.paddingV8, right: Sizes.paddingH8),
+          padding: const EdgeInsets.only(top: Sizes.paddingV8, right: Sizes.paddingH8),
           child: SvgPicture.asset(
             image,
             package: AppConstants.packageName,

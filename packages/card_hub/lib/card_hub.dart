@@ -1,5 +1,5 @@
 /// A Flutter package for animated credit/debit card displays in payment apps and digital wallets.
-/// 
+///
 /// Features include animated card selection, premium branding with Material 3 theming,
 /// and optimized performance for production applications.
 library card_hub;

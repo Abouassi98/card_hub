@@ -90,38 +90,28 @@ class _CardHubState extends State<CardHub> with AutomaticKeepAliveClientMixin {
 
   /// Initializes the widget with data using optimized lazy loading approach
   Future<void> _initialize() async {
-    setState(() {
-      _isLoading = true;
-      // Initialize collections to prevent null errors
-      _displayItems = [];
-      _brandingPalettes = {};
-    });
-
+    // If any item is marked default, persist it first
     if (widget.items.any((item) => item.isDefault)) {
       _defaultCardId = widget.items.firstWhere((item) => item.isDefault).id;
       await CardHubService.saveDefaultCardId(_defaultCardId!);
     }
 
-    // 1. Fetch the default card ID from the service
-    final savedDefaultId =
-        _defaultCardId ?? await CardHubService.getDefaultCardId();
+    // 1) Resolve default ID, 2) reorder items, 3) compute selected index
+    final savedDefaultId = _defaultCardId ?? await CardHubService.getDefaultCardId();
+    final reorderedItems = CardHubService.reorderCardsByDefaultId(widget.items, savedDefaultId);
+    final selectedIndex = CardHubService.findDefaultCardIndex(reorderedItems, savedDefaultId);
 
-    // 2. Reorder the items based on default card ID
-    final reorderedItems =
-        CardHubService.reorderCardsByDefaultId(widget.items, savedDefaultId);
-    // 3. Find the selected card index
-    final selectedIndex =
-        CardHubService.findDefaultCardIndex(reorderedItems, savedDefaultId);
-    // 4. First update state with basic data to show UI faster
+    // Single, batched state update to avoid multiple rebuilds
     setState(() {
       _displayItems = reorderedItems;
       _defaultCardId = savedDefaultId;
       _selectedCardIndex = selectedIndex;
       _isLoading = false;
+      // Reset palettes; they will be filled asynchronously
+      _brandingPalettes = {};
     });
 
-    // 5. Then lazily load color palettes in the background
-    // This allows the UI to be interactive while palettes are loading
+    // Lazily load palettes in background
     await _loadColorPalettes();
   }
 
@@ -133,9 +123,12 @@ class _CardHubState extends State<CardHub> with AutomaticKeepAliveClientMixin {
 
     // Only update state if widget is still mounted
     if (mounted) {
-      setState(() {
-        _brandingPalettes = palettes;
-      });
+      // Only trigger rebuild if palettes actually changed
+      if (!CardHubService.palettesEqual(_brandingPalettes, palettes)) {
+        setState(() {
+          _brandingPalettes = palettes;
+        });
+      }
     }
   }
 
@@ -156,8 +149,12 @@ class _CardHubState extends State<CardHub> with AutomaticKeepAliveClientMixin {
     super.build(context); // Required by AutomaticKeepAliveClientMixin
     // Direct state-based rendering for better performance
     if (_isLoading) {
-      return widget.loadingWidget ??
-          const Center(child: CircularProgressIndicator());
+      return widget.loadingWidget ?? const Center(child: CircularProgressIndicator());
+    }
+
+    // Fast-path: render nothing for empty lists to avoid building animated stack
+    if (_displayItems.isEmpty) {
+      return const SizedBox.shrink();
     }
 
     return SingleChildScrollView(
@@ -197,14 +194,14 @@ class _CardHubState extends State<CardHub> with AutomaticKeepAliveClientMixin {
                     _displayItems[i].onCardTap?.call(_displayItems[i]);
                   },
                   child: CardHubComponent(
+                    key: ValueKey<String>(_displayItems[i].id),
                     defaultBadge: widget.defaultBadge,
                     nonDefaultBadge: widget.nonDefaultBadge,
                     isSelected: i == _selectedCardIndex,
                     isDefault: _displayItems[i].id == _defaultCardId,
                     onRemoveCard: widget.onRemoveCard,
                     card: _displayItems[i],
-                    brandingPalette:
-                        _brandingPalettes[_displayItems[i].logoAssetPath],
+                    brandingPalette: _brandingPalettes[_displayItems[i].logoAssetPath],
                     visaMasterCardType: CardType.values.firstWhere(
                       (element) => element.name == _displayItems[i].type.name,
                       orElse: () => CardType.visa,

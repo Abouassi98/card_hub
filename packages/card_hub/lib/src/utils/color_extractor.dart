@@ -46,7 +46,7 @@ class ColorExtractor {
             (((r ~/ step) * step) << 16) |
             (((g ~/ step) * step) << 8) |
             ((b ~/ step) * step);
-        
+
         colorCounts[quantizedColor] = (colorCounts[quantizedColor] ?? 0) + 1;
       }
 
@@ -55,8 +55,7 @@ class ColorExtractor {
       }
 
       // --- 4. Find the Most Dominant Colors ---
-      final sortedColors = colorCounts.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value));
+      final sortedColors = colorCounts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
 
       // --- KEY CHANGE ---
       // If we have two or more distinct, dominant colors, use them.
@@ -73,9 +72,8 @@ class ColorExtractor {
         final darkerHsl = hsl.withLightness((hsl.lightness * 0.7).clamp(0.0, 1.0));
         return [primaryColor, darkerHsl.toColor()];
       }
-      
-      return fallbackPalette;
 
+      return fallbackPalette;
     } catch (e) {
       debugPrint('Error extracting palette: $e');
       return fallbackPalette;
