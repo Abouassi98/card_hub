@@ -37,7 +37,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  card_hub: ^0.1.0
+  card_hub: ^0.2.0
 ```
 
 Then run:
