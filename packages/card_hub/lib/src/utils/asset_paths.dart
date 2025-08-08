@@ -1,5 +1,5 @@
 /// Generate by [asset_generator](https://github.com/fluttercandies/flutter_asset_generator) library.
-/// PLEASE DO NOT EDIT MANUALLY.
+// PLEASE DO NOT EDIT MANUALLY.
 // ignore_for_file: constant_identifier_names
 /// Provides static asset paths for image resources used throughout Card Hub.
 /// Part of the global asset management utility layer.
