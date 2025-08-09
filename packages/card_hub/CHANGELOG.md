@@ -12,6 +12,14 @@ All notable changes to the Card Hub package will be documented in this file.
 
 ### Fixed
 -
+## 0.4.1 - 2025-08-09
+
+### Changed
+- Bumped package version to 0.4.1 in `pubspec.yaml`.
+- Adjusted `repository` to root repo (cloneable) and `homepage` to the package subdirectory for monorepo compliance.
+
+### Fixed
+- Addressed pub.dev validation warnings about repository verification and issue tracker reachability.
 ## 0.4.0 - 2025-08-09
 
 ### Changed
