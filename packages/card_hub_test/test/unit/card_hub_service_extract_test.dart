@@ -85,7 +85,6 @@ void main() {
           cardHolderName: 'A',
           type: CardType.visa,
           bankName: 'X',
-          logoAssetPath: null,
         ),
       ];
 
