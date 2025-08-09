@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'Credit Hub',
+      title: 'Credit Hub 2',
       home: CardHub(
         items: [
           CardHubModel(
