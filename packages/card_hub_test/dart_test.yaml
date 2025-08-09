@@ -1,9 +1,19 @@
+## notes:
+## You can organize tests with named `tags`. We define a `perf` tag for
+## performance-heavy tests and a `slow` tag for longer tests.
+##
+## How to run:
+## - All tests:             `flutter test`
+## - Only perf tests:       `flutter test --tags perf`
+## - Exclude perf tests:    `flutter test --exclude-tags perf`
+##
 tags:
   perf:
     timeout: 3x
   slow:
     timeout: 5x
 
-# Default platforms for tests in this package
+# Default platforms for tests in this package.
+# `vm` = Dart VM (headless). Widget tests run fine on VM.
 platforms:
   - vm

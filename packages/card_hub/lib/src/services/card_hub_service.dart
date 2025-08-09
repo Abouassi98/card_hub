@@ -51,7 +51,15 @@ class CardHubService {
   }
 
   /// Extracts color palettes from logo assets
-  static Future<Map<String, List<Color>>> extractColorPalettes(List<CardHubModel> items) async {
+  ///
+  /// [extractor] is an optional test seam that allows injecting a custom palette
+  /// extraction from raw [ByteData]. In production, this should be left null.
+  static Future<Map<String, List<Color>>> extractColorPalettes(
+    List<CardHubModel> items, {
+    // Test-only seam: allows injecting a fake palette extractor in unit tests.
+    // Leave null in production code.
+    Future<List<Color>> Function(ByteData bytes, String path)? extractor,
+  }) async {
     final uniqueLogoPaths = items.map((item) => item.logoAssetPath).toSet();
     final Map<String, List<Color>> palettes = {};
 
@@ -69,6 +77,18 @@ class CardHubService {
 
       try {
         final byteData = await rootBundle.load(path);
+
+        // If a test extractor is provided, use it and cache the result.
+        if (extractor != null) {
+          try {
+            final palette = await extractor(byteData, path);
+            palettes[path] = palette;
+            _colorPaletteCache[path] = palette;
+            continue;
+          } catch (e) {
+            debugPrint('Custom extractor failed, falling back to default: $e');
+          }
+        }
 
         // Use the new Material 3 color extraction for premium branding
         try {
