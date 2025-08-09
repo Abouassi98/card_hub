@@ -1,0 +1,102 @@
+name: Publish to pub.dev
+
+# Trigger only when a PR into main is closed (merged). We don't publish on tag pushes anymore.
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+  # Allow manual re-run when needed; still gated by guard/dry_run.
+  workflow_dispatch:
+
+# Ensure only one publish pipeline per ref runs at a time
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Guard job: ensures the PR is merged into main and the title matches Release-vX.Y.Z
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    # Only run guard when PR was merged and base is main
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main'
+    steps:
+      - name: Validate PR title pattern
+        shell: bash
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          # Allow prereleases like Release-v0.3.0-beta.1
+          if [[ ! "$title" =~ ^Release-v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.\-]+)?$ ]]; then
+            echo "PR title must match: Release-vX.Y.Z or Release-vX.Y.Z-<prerelease> (e.g., Release-v0.3.0 or Release-v0.3.0-beta.1). Got: '$title'"
+            exit 1
+          fi
+
+  # Dry-run job to validate package before real publish
+  dry_run:
+    needs: guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      # Check out the repository at the exact merge commit that triggered this workflow.
+      # This ensures we validate and publish the same content that exists in main after merge.
+      - uses: actions/checkout@v4
+      # Install the Dart SDK so we can run `dart pub ...` commands.
+      - uses: dart-lang/setup-dart@v1
+      - name: Cache pub cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          # Use pubspec.yaml for packages (pubspec.lock isn't typically committed for packages)
+          key: pub-cache-${{ runner.os }}-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: |
+            pub-cache-${{ runner.os }}-
+      # Make sure the version in pubspec.yaml equals the version encoded in the PR title.
+      # We allow prereleases (e.g., 0.3.0-beta.1) and require an exact string match with the title.
+      - name: Validate pubspec version matches PR title
+        shell: bash
+        working-directory: packages/card_hub
+        run: |
+          # Extract version from the PR title by removing the `Release-v` prefix.
+          title="${{ github.event.pull_request.title }}"
+          ver_from_title="${title#Release-v}"
+          # Read the version field from pubspec.yaml
+          pubspec_ver=$(grep -E '^version:' pubspec.yaml | awk '{print $2}')
+          echo "PR Title Version: $ver_from_title"
+          echo "pubspec.yaml Version: $pubspec_ver"
+          if [[ "$ver_from_title" != "$pubspec_ver" ]]; then
+            echo "Version mismatch: PR=$ver_from_title pubspec.yaml=$pubspec_ver"
+            exit 1
+          fi
+      # Validate the package using pub's built-in dry-run. This checks metadata, assets,
+      # README, CHANGELOG presence (recommended), pubspec fields, and more without publishing.
+      - name: Pub dry run
+        working-directory: packages/card_hub
+        run: dart pub publish --dry-run
+
+  publish:
+    # Wait for guard; this job only runs if guard succeeds (valid title and merged into main)
+    needs: [guard, dry_run]
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # Required for authentication using OIDC
+      contents: read    # Required to read repository contents
+    steps:
+      # Check out the repository to access the package to be published.
+      - uses: actions/checkout@v4
+      # Install the Dart SDK for the actual publish command.
+      - uses: dart-lang/setup-dart@v1
+      # Perform the actual publish. The `-f` flag runs non-interactively.
+      # Authentication uses GitHub OIDC (id-token: write) and requires Trusted Publishing
+      # to be configured on pub.dev for this repository/publisher.
+      - name: Publish to pub.dev
+        working-directory: packages/card_hub
+        run: dart pub publish -f
